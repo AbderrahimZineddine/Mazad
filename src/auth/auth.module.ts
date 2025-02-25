@@ -9,6 +9,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
 import { OTPService } from "./otp.service";
 import {
   RefreshToken,
+  
   RefreshTokenSchema,
 } from "./schemas/refresh-token.schema";
 import { ConfigService } from "@nestjs/config";
