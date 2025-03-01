@@ -12,7 +12,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   // Enable CORS
-  app.enableCors();
+  // app.enableCors();
 
   // Use global validation pipe
   // Add this before Swagger setup

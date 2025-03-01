@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+// import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SalesModule } from './sales/sales.module';
 import { UsersModule } from './users/users.module';
@@ -11,9 +11,13 @@ import { BidsModule } from './bids/bids.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true, // Makes the config available globally
-    }),
+
+    //TODO ??? 
+    // ConfigModule.forRoot({
+    //   isGlobal: true, // Makes the config available globally
+    // }),
+
+
     MongooseModule.forRoot(
       process.env.MONGO_URI || 'mongodb://localhost:27017/auction-app',
     ),
