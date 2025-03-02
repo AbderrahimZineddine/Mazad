@@ -5,8 +5,7 @@ import { User } from "src/decorators/user.decorator";
 import { CreateUserDto } from "src/users/dtos/create-user.dto";
 import { RtAuthGuard } from "src/guards/rt-auth.guard";
 import { UserDocument } from "src/users/schemas/user.schema";
-import { IsNotEmpty,IsString, MinLength } from "class-validator";
-
+import { IsNotEmpty, IsString, MinLength } from "class-validator";
 
 // DTO Classes
 class ForgotPasswordDto {
@@ -32,7 +31,7 @@ class LoginDto {
 
   @IsString()
   @IsNotEmpty()
-  password:  string;
+  password: string;
 }
 
 @Controller("auth")
@@ -70,7 +69,7 @@ export class AuthController {
       forgotPasswordDto.newPassword
     );
     return {
-      status: "success",
+      success: true,
       data: result,
     };
   }
@@ -79,7 +78,7 @@ export class AuthController {
   async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
     const result = await this.authService.resendOtp(resendOtpDto.phone);
     return {
-      status: "success",
+      success: true,
       data: result,
     };
   }

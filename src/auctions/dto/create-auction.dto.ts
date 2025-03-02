@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { 
-    IsString, IsDate, IsNumber, Min, 
+    IsString, IsDate,  
     IsNotEmpty, MinDate, 
   } from 'class-validator';
   import { Type } from 'class-transformer';
@@ -13,19 +13,19 @@ import {
     @IsDate()
     @MinDate(new Date())
     @Type(() => Date)
-    date: Date;
+    endingDate: Date;
   
     @IsString()
     @IsNotEmpty()
-    wilaya: string;
+    region: string;
   
-    @IsNumber()
-    @Min(0)
-    subscriptionFeeDinar: number;
+    // @IsNumber()
+    // @Min(0)
+    // subscriptionFeeDinar: number;
   
-    @IsNumber()
-    @Min(0)
-    subscriptionFeePoints: number;
+    // @IsNumber()
+    // @Min(0)
+    // subscriptionFeePoints: number;
   
     // // Note: 'description' exists in Joi but not in model - add if needed
     // @IsString()

@@ -37,16 +37,12 @@ export class SalesController {
 
   @Get()
   findAll(
-    @Query("location") location: string,
-    @Query("beginDate") beginDate: Date,
-    @Query("endDate") endDate: Date,
+    @Query("region") region: string,
     @Query("page", new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query("limit", new DefaultValuePipe(100), ParseIntPipe) limit: number = 100
   ) {
     return this.salesService.findAll({
-      location,
-      beginDate,
-      endDate,
+      region,
       page,
       limit,
     });

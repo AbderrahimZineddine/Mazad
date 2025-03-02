@@ -9,10 +9,10 @@ export class Auction extends Document {
   title: string;
 
   @Prop({ required: true })
-  date: Date;
+  endingDate: Date;
 
   @Prop({ required: true })
-  wilaya: string;
+  region: string;
 
   @Prop([String])
   categories: string[];
@@ -23,17 +23,15 @@ export class Auction extends Document {
   })
   status: string;
 
-  @Prop({ required: true })
-  subscriptionFeeDinar: number;
+  // @Prop({ required: true })
+  // subscriptionFeeDinar: number;
 
-  @Prop({ required: true })
-  subscriptionFeePoints: number;
+  // @Prop({ required: true })
+  // subscriptionFeePoints: number;
 
-  @Prop([{ type: Types.ObjectId, ref: 'Product' }])
-  products: Types.ObjectId[];
-
-  @Prop([{ type: Types.ObjectId, ref: 'User' }])
+  @Prop([{ type: Types.ObjectId, ref: 'User'  }])
   subscribers: Types.ObjectId[];
+  
 }
 
 export const AuctionSchema = SchemaFactory.createForClass(Auction);

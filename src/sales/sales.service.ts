@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Sales } from './schemas/sales.schema';
@@ -11,16 +11,13 @@ export class SalesService {
   constructor(@InjectModel(Sales.name) private salesModel: Model<Sales>) {}
 
   async create(createSaleDto: CreateSaleDto): Promise<Sales> {
-    if (createSaleDto.endDate <= createSaleDto.beginDate) {
-      throw new BadRequestException('End date must be after begin date');
-    }
-    
+  
     const newSale = new this.salesModel(createSaleDto);
     return newSale.save();
   }
 
   async findAll(filters: { 
-    location?: string;
+    region?: string;
     beginDate?: Date;
     endDate?: Date;
     page: number;
@@ -28,7 +25,7 @@ export class SalesService {
   }): Promise<Sales[]> {
     const query: any = {};
     
-    if (filters.location) query.location = filters.location;
+    if (filters.region) query.region = filters.region;
     if (filters.beginDate || filters.endDate) {
       query.endDate = {};
       if (filters.beginDate) query.endDate.$gte = filters.beginDate;

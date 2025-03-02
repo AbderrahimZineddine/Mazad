@@ -11,6 +11,7 @@ import { Auction } from "./schemas/auction.schema";
 import { User } from "../users/schemas/user.schema";
 import { CreateAuctionDto } from "./dto/create-auction.dto";
 import { UpdateAuctionDto } from "./dto/update-auction.dto";
+// import { filter } from "compression";
 
 @Injectable()
 export class AuctionsService {
@@ -38,14 +39,21 @@ export class AuctionsService {
 
   async findAll(filters: {
     status?: string;
-    wilaya?: string;
+    region?: string;
+    title?: string;
+    endingDate?: Date;
     page: number;
     limit: number;
   }): Promise<Auction[]> {
     const query: any = {};
 
     if (filters.status) query.status = filters.status;
-    if (filters.wilaya) query.wilaya = filters.wilaya;
+    if (filters.region) query.region = filters.region;
+    if (filters.title) query.title = filters.title;
+
+    if (filters.endingDate) {
+      query.endingDate = filters.endingDate;
+    }
 
     return this.auctionModel
       .find(query)
@@ -143,7 +151,7 @@ export class AuctionsService {
           _id: "$_id",
           title: { $first: "$title" },
           date: { $first: "$date" },
-          wilaya: { $first: "$wilaya" },
+          region: { $first: "$region" },
           status: { $first: "$status" },
           products: { $push: "$products" },
           createdAt: { $first: "$createdAt" },
