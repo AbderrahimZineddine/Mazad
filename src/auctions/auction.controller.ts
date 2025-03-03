@@ -9,7 +9,6 @@ import {
   Patch,
   Post,
   Query,
-  
 } from "@nestjs/common";
 // import { AuthGuard } from "src/guards/auth.guard";
 // import { AdminGuard } from "src/guards/admin.guard";
@@ -42,7 +41,7 @@ export class AuctionsController {
     const auction = await this.auctionsService.findOne(id);
     return {
       success: true,
-      statusCode : 200,
+      statusCode: 200,
       data: auction,
     };
   }
@@ -54,6 +53,7 @@ export class AuctionsController {
     @Query("title") title: string,
     @Query("endingDate") endingDate: Date,
     @Query("page") page: number = 1,
+    @Query("sort") sort: string = "-createdAt",
     @Query("limit") limit: number = 100
   ) {
     const auctions = await this.auctionsService.findAll({
@@ -63,11 +63,12 @@ export class AuctionsController {
       endingDate,
       page,
       limit,
+      sort,
     });
 
     return {
       success: true,
-      statusCode : 200,
+      statusCode: 200,
       page,
       limit,
       data: auctions,
@@ -83,7 +84,7 @@ export class AuctionsController {
     const auction = await this.auctionsService.update(id, updateAuctionDto);
     return {
       success: true,
-      statusCode : 200,
+      statusCode: 200,
       data: auction,
     };
   }
@@ -95,7 +96,7 @@ export class AuctionsController {
     await this.auctionsService.remove(id);
     return {
       success: true,
-      statusCode : 204,
+      statusCode: 204,
       message: "Auction deleted successfully",
     };
   }
@@ -103,12 +104,12 @@ export class AuctionsController {
   @Post(":id/subscribe")
   async subscribeToAuction(
     @Param("id") auctionId: string,
-    @User() user: { _id: Types.ObjectId }, // user.id is a string
+    @User() user: { _id: Types.ObjectId } // user.id is a string
     // @Body("usePoints") usePoints: boolean
   ) {
     const auction = await this.auctionsService.subscribe(
       auctionId,
-      user._id, // Now passing ObjectId
+      user._id // Now passing ObjectId
       // usePoints
     );
 

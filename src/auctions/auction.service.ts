@@ -42,6 +42,7 @@ export class AuctionsService {
     region?: string;
     title?: string;
     endingDate?: Date;
+    sort: string;
     page: number;
     limit: number;
   }): Promise<Auction[]> {
@@ -65,7 +66,7 @@ export class AuctionsService {
       .find(query)
       .skip((filters.page - 1) * filters.limit)
       .limit(filters.limit)
-      .sort("-createdAt")
+      .sort(filters.sort)
       .exec();
   }
 

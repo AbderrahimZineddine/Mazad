@@ -27,13 +27,15 @@ export class BannerController {
     @Query("region") region: string,
     @Query("title") title: string,
     @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100
+    @Query("limit") limit: number = 100,
+    @Query("sort") sort: string = "-createdAt"
   ) {
     return this.bannerService.findAll({
       region,
       title,
       page,
       limit,
+      sort,
     });
   }
 

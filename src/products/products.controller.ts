@@ -37,6 +37,7 @@ export class ProductsController {
     @Query("name") name: string,
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
+    @Query("sort") sort: string = "-createdAt",
     @Param("auctionId") auctionId: string
   ) {
     const data = await this.productsService.findAll(auctionId, {
@@ -44,6 +45,7 @@ export class ProductsController {
       name,
       page,
       limit,
+      sort,
     });
 
     return {

@@ -20,6 +20,7 @@ export class BannerService {
     title?: string;
     page: number;
     limit: number;
+    sort : string;
   }): Promise<Banner[]> {
     const query: any = {};
 
@@ -34,7 +35,7 @@ export class BannerService {
       .find(query)
       .skip((filters.page - 1) * filters.limit)
       .limit(filters.limit)
-      .sort("-createdAt")
+      .sort(filters.sort)
       .exec();
   }
 

@@ -38,6 +38,7 @@ export class ProductsService {
       name?: string;
       page: number;
       limit: number;
+      sort: string;
     }
   ) {
     const query: any = {};
@@ -55,7 +56,7 @@ export class ProductsService {
       .find(query)
       .skip((filters.page - 1) * filters.limit)
       .limit(filters.limit)
-      .sort("-createdAt");
+      .sort(filters.sort);
   }
 
   async update(id: string, updateData: Partial<Product>) {
