@@ -10,7 +10,7 @@ import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { Request } from "express";
-import { User, UserDocument } from "src/users/schemas/user.schema";
+import { User, UserDocument } from "src/modules/users/schemas/user.schema";
 import { RequestWithUser } from "src/types/request-with-user.type";
 
 @Injectable()
@@ -39,7 +39,7 @@ export class AuthGuard implements CanActivate {
 
       request.user = user;
       return true;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.log(error);
       throw new UnauthorizedException("Invalid or expired token");

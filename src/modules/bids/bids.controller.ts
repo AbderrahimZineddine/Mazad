@@ -10,17 +10,17 @@ import {
   Query,
   UseGuards,
   Req,
-} from '@nestjs/common';
-import { BidsService } from './bids.service';
-import { CreateBidDto } from './dto/create-bid.dto';
-import { UpdateBidDto } from './dto/update-bid.dto';
-import { AuthGuard } from '../guards/auth.guard';
-import { ValidateBidUpdateGuard } from '../guards/validate-bid-update.guard';
-import { ValidateBidDeletionGuard } from '../guards/validate-bid-deletion.guard';
-import { ValidateBidCreationGuard } from 'src/guards/validate-bid-creation.guard';
-import { RequestWithUser } from '../types/request-with-user.type';
+} from "@nestjs/common";
+import { BidsService } from "./bids.service";
+import { CreateBidDto } from "./dto/create-bid.dto";
+import { UpdateBidDto } from "./dto/update-bid.dto";
+import { AuthGuard } from "../../guards/auth.guard";
+import { ValidateBidUpdateGuard } from "../../guards/validate-bid-update.guard";
+import { ValidateBidDeletionGuard } from "../../guards/validate-bid-deletion.guard";
+import { ValidateBidCreationGuard } from "src/guards/validate-bid-creation.guard";
+import { RequestWithUser } from "../../types/request-with-user.type";
 
-@Controller('bids')
+@Controller("bids")
 @UseGuards(AuthGuard)
 export class BidsController {
   constructor(private readonly bidsService: BidsService) {}
@@ -31,14 +31,15 @@ export class BidsController {
     return this.bidsService.create(req.user.id, createBidDto);
   }
 
-  @Get('auction/:auctionId')
-  findByAuction(@Param('auctionId') auctionId: string) {
+  @Get("auction/:auctionId")
+  findByAuction(@Param("auctionId") auctionId: string) {
     return this.bidsService.findByAuction(auctionId);
   }
 
   @Get()
   findAll(
-    @Query() filters: { 
+    @Query()
+    filters: {
       user?: string;
       product?: string;
       auction?: string;
@@ -55,20 +56,20 @@ export class BidsController {
     return this.bidsService.findAll(filters);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
+  @Get(":id")
+  findOne(@Param("id") id: string) {
     return this.bidsService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch(":id")
   @UseGuards(ValidateBidUpdateGuard)
-  update(@Param('id') id: string, @Body() updateBidDto: UpdateBidDto) {
+  update(@Param("id") id: string, @Body() updateBidDto: UpdateBidDto) {
     return this.bidsService.update(id, updateBidDto);
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @UseGuards(ValidateBidDeletionGuard)
-  remove(@Param('id') id: string) {
+  remove(@Param("id") id: string) {
     return this.bidsService.remove(id);
   }
 }

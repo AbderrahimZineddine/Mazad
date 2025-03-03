@@ -14,9 +14,9 @@ import {
   BadRequestException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { AuthGuard } from "../guards/auth.guard";
-import { AdminGuard } from "../guards/admin.guard";
-import { RequestWithUser } from "../types/request-with-user.type";
+import { AuthGuard } from "../../guards/auth.guard";
+import { AdminGuard } from "../../guards/admin.guard";
+import { RequestWithUser } from "../../types/request-with-user.type";
 import { OwnerOrAdminGuard } from "src/guards/owner-or-admin.guard";
 import { UpdateUserDto } from "./dtos/update-user.dto";
 

@@ -2,9 +2,9 @@
 import { Controller, Post, Body, Get, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { User } from "src/decorators/user.decorator";
-import { CreateUserDto } from "src/users/dtos/create-user.dto";
+import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
 import { RtAuthGuard } from "src/guards/rt-auth.guard";
-import { UserDocument } from "src/users/schemas/user.schema";
+import { UserDocument } from "src/modules/users/schemas/user.schema";
 import { IsNotEmpty, IsString, MinLength } from "class-validator";
 
 // DTO Classes

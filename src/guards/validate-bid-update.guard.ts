@@ -7,10 +7,10 @@ import {
   NotFoundException,
   ForbiddenException,
 } from "@nestjs/common";
-import { BidsService } from "../bids/bids.service";
+import { BidsService } from "../modules/bids/bids.service";
 import { ProductsService } from "../products/products.service";
 import { RequestWithUser } from "../types/request-with-user.type";
-import { AuctionsService } from "src/auctions/auction.service";
+import { AuctionsService } from "src/modules/auctions/auction.service";
 
 @Injectable()
 export class ValidateBidUpdateGuard implements CanActivate {

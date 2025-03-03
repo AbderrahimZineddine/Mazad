@@ -12,7 +12,7 @@ import * as bcrypt from "bcrypt";
 import { User, UserDocument } from "../users/schemas/user.schema";
 import { RefreshToken } from "./schemas/refresh-token.schema";
 import { OTPService } from "./otp.service";
-import { CreateUserDto } from "src/users/dtos/create-user.dto";
+import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
 
 @Injectable()
 export class AuthService {

@@ -5,8 +5,8 @@ import { Product, ProductSchema } from "./schemas/product.schema";
 import { Auction, AuctionSchema } from "../auctions/schemas/auction.schema";
 import { ProductsController } from "./products.controller";
 import { ProductsService } from "./products.service";
-import { AuthModule } from "src/auth/auth.module";
-import { UsersModule } from "src/users/users.module";
+import { AuthModule } from "src/modules/auth/auth.module";
+import { UsersModule } from "src/modules/users/users.module";
 
 @Module({
   imports: [

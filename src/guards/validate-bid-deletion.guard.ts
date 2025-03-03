@@ -7,8 +7,8 @@ import {
   NotFoundException,
   ForbiddenException,
 } from "@nestjs/common";
-import { BidsService } from "../bids/bids.service";
-import { UsersService } from "../users/users.service";
+import { BidsService } from "../modules/bids/bids.service";
+import { UsersService } from "../modules/users/users.service";
 import { RequestWithUser } from "../types/request-with-user.type";
 
 @Injectable()
