@@ -31,7 +31,7 @@ export class ProductsController {
     };
   }
 
-  @Get(":auctionId")
+  @Get("auction/:auctionId")
   async getAllProducts(
     @Query("category") category: string,
     @Query("name") name: string,

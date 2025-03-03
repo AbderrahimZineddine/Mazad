@@ -14,21 +14,21 @@ import {
 import { BidsService } from "./bids.service";
 import { CreateBidDto } from "./dto/create-bid.dto";
 import { UpdateBidDto } from "./dto/update-bid.dto";
-import { AuthGuard } from "../../guards/auth.guard";
-import { ValidateBidUpdateGuard } from "../../guards/validate-bid-update.guard";
-import { ValidateBidDeletionGuard } from "../../guards/validate-bid-deletion.guard";
+// import { AuthGuard } from "../../guards/auth.guard";
+// import { ValidateBidUpdateGuard } from "../../guards/validate-bid-update.guard";
+// import { ValidateBidDeletionGuard } from "../../guards/validate-bid-deletion.guard";
 import { ValidateBidCreationGuard } from "src/guards/validate-bid-creation.guard";
 import { RequestWithUser } from "../../types/request-with-user.type";
 
 @Controller("bids")
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 export class BidsController {
   constructor(private readonly bidsService: BidsService) {}
 
   @Post()
   @UseGuards(ValidateBidCreationGuard)
   create(@Req() req: RequestWithUser, @Body() createBidDto: CreateBidDto) {
-    return this.bidsService.create(req.user.id, createBidDto);
+    return this.bidsService.create("req.user.id", createBidDto);
   }
 
   @Get("auction/:auctionId")
@@ -36,7 +36,7 @@ export class BidsController {
     return this.bidsService.findByAuction(auctionId);
   }
 
-  @Get()
+  @Get("product/:productId")
   findAll(
     @Query()
     filters: {
@@ -62,13 +62,13 @@ export class BidsController {
   }
 
   @Patch(":id")
-  @UseGuards(ValidateBidUpdateGuard)
+  // @UseGuards(ValidateBidUpdateGuard)
   update(@Param("id") id: string, @Body() updateBidDto: UpdateBidDto) {
     return this.bidsService.update(id, updateBidDto);
   }
 
   @Delete(":id")
-  @UseGuards(ValidateBidDeletionGuard)
+  // @UseGuards(ValidateBidDeletionGuard)
   remove(@Param("id") id: string) {
     return this.bidsService.remove(id);
   }

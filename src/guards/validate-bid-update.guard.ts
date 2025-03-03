@@ -8,9 +8,9 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { BidsService } from "../modules/bids/bids.service";
-import { ProductsService } from "../products/products.service";
 import { RequestWithUser } from "../types/request-with-user.type";
 import { AuctionsService } from "src/modules/auctions/auction.service";
+import { ProductsService } from "src/modules/products/products.service";
 
 @Injectable()
 export class ValidateBidUpdateGuard implements CanActivate {

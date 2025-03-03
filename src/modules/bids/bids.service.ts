@@ -111,7 +111,7 @@ export class BidsService {
 
     return this.bidModel
       .find(query)
-      .populate("user", "name email")
+      // .populate("user", "name email")  //TODO return this
       .populate("product", "name price");
   }
 

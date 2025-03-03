@@ -42,6 +42,19 @@ export class ProductsService {
     }
   ) {
     const query: any = {};
+
+    try {
+      const auction = await this.auctionModel.findById(auctionId);
+      if (!auction) {
+        throw new NotFoundException(`Auction with id ${auctionId} not found`);
+      }
+    } catch (error) {
+      if (error.name === 'CastError') {
+        throw new NotFoundException(`Auction with id ${auctionId} not found`);
+      }
+      throw error;
+    }
+    
     query.auction = auctionId;
 
     if (filters.category) {

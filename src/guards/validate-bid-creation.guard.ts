@@ -8,8 +8,8 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { RequestWithUser } from "../types/request-with-user.type";
-import { ProductsService } from "../products/products.service";
 import { AuctionsService } from "src/modules/auctions/auction.service";
+import { ProductsService } from "src/modules/products/products.service";
 
 @Injectable()
 export class ValidateBidCreationGuard implements CanActivate {
@@ -24,14 +24,16 @@ export class ValidateBidCreationGuard implements CanActivate {
 
     if (!product) throw new NotFoundException("Product not found");
 
-    const auction = await this.auctionsService.findByProduct(product.id);
+    const auction = await this.auctionsService.findOne(
+      product.auction.toString()
+    );
     if (!auction) throw new NotFoundException("Auction not found");
 
-    if (!auction.subscribers.includes(req.user.id)) {
-      throw new ForbiddenException(
-        "You must subscribe to the auction to place bids"
-      );
-    }
+    // if (!auction.subscribers.includes(req.user.id)) {
+    //   throw new ForbiddenException(
+    //     "You must subscribe to the auction to place bids"
+    //   );
+    // }
 
     if (auction.status === "Closed") {
       throw new ForbiddenException("Auction is closed for bidding");
