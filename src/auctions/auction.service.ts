@@ -25,7 +25,7 @@ export class AuctionsService {
     try {
       const newAuction = new this.auctionModel(createAuctionDto);
       return await newAuction.save();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw new InternalServerErrorException("Failed to create auction");
     }
@@ -47,12 +47,18 @@ export class AuctionsService {
   }): Promise<Auction[]> {
     const query: any = {};
 
-    if (filters.status) query.status = filters.status;
-    if (filters.region) query.region = filters.region;
-    if (filters.title) query.title = filters.title;
+    if (filters.status) {
+      query.status = filters.status;
+    }
+    if (filters.region) {
+      query.region = { $regex: filters.region, options: "i" };
+    }
+    if (filters.title) {
+      query.title = { $regex: filters.title, options: "i" };
+    }
 
     if (filters.endingDate) {
-      query.endingDate = filters.endingDate;
+      query.endingDate = { $lte: new Date(filters.endingDate) };
     }
 
     return this.auctionModel
@@ -84,7 +90,7 @@ export class AuctionsService {
 
   async subscribe(
     auctionId: string,
-    userId: Types.ObjectId,
+    userId: Types.ObjectId
     // usePoints: boolean
   ): Promise<Auction> {
     const auction = await this.auctionModel.findById(auctionId);
@@ -160,23 +166,24 @@ export class AuctionsService {
     ]);
   }
 
-
   async getWithSubscriptions(userId: Types.ObjectId): Promise<any[]> {
     const auctions = await this.auctionModel.find().lean();
-    return auctions.map(auction => ({
+    return auctions.map((auction) => ({
       ...auction,
-      isSubscribed: auction.subscribers.some(subId => subId.equals(userId)),
+      isSubscribed: auction.subscribers.some((subId) => subId.equals(userId)),
     }));
   }
 
   // Add this method
   async findByProduct(productId: string): Promise<Auction> {
-    const auction = await this.auctionModel.findOne({
-      products: productId
-    }).exec();
+    const auction = await this.auctionModel
+      .findOne({
+        products: productId,
+      })
+      .exec();
 
     if (!auction) {
-      throw new NotFoundException('Auction not found for this product');
+      throw new NotFoundException("Auction not found for this product");
     }
 
     return auction;

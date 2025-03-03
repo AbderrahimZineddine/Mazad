@@ -8,60 +8,87 @@ import {
   Param,
   Query,
   Body,
-  UseGuards,
+  // UseGuards,
 } from "@nestjs/common";
 import { ProductsService } from "./products.service";
-import { AuthGuard } from "src/guards/auth.guard";
-import { AdminGuard } from "src/guards/admin.guard";
+// import { AuthGuard } from "src/guards/auth.guard";
+// import { AdminGuard } from "src/guards/admin.guard";
 import { CreateProductDto } from "./dto/create-product.dto";
 import { UpdateProductDto } from "./dto/update-product.dto";
 
 @Controller("products")
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   async createProduct(@Body() createProductDto: CreateProductDto) {
-    const { auction, ...productData } = createProductDto;
-    return this.productsService.create(productData, auction);
+    const data = await this.productsService.create(createProductDto);
+
+    return {
+      data,
+    };
   }
 
-  @Get()
+  @Get(":auctionId")
   async getAllProducts(
     @Query("category") category: string,
     @Query("name") name: string,
-    @Query("auction") auction: string,
     @Query("page") page: number = 1,
-    @Query("limit") limit: number = 100
+    @Query("limit") limit: number = 100,
+    @Param("auctionId") auctionId: string
   ) {
-    return this.productsService.findAll({
+    const data = await this.productsService.findAll(auctionId, {
       category,
       name,
-      auction,
       page,
       limit,
     });
+
+    return {
+      success: true,
+      statusCode: 200,
+      limit,
+      page,
+      data,
+    };
   }
 
   @Get(":id")
   async getProduct(@Param("id") id: string) {
-    return this.productsService.findOne(id);
+    const data = await this.productsService.findOne(id);
+
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
   }
 
   @Patch(":id")
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   async updateProduct(
     @Param("id") id: string,
     @Body() updateProductDto: UpdateProductDto
   ) {
-    return this.productsService.update(id, updateProductDto);
+    const data = await this.productsService.update(id, updateProductDto);
+
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
   }
 
   @Delete(":id")
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   async deleteProduct(@Param("id") id: string) {
-    return this.productsService.remove(id);
+    await this.productsService.remove(id);
+    return {
+      success: true,
+      statusCode: 204,
+      message: "Product deleted successfully",
+    };
   }
 }

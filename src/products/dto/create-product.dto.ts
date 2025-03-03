@@ -21,11 +21,11 @@ export class CreateProductDto {
 
   @IsNumber()
   @Min(0)
-  initialPrice: number;
+  price: number;
 
   @IsNumber()
   @Min(1)
-  quantity: number;
+  stock: number;
 
   @IsString()
   @IsNotEmpty()
@@ -34,5 +34,5 @@ export class CreateProductDto {
   @IsArray()
   @IsNumber({}, { each: true })
   @Min(1, { each: true })
-  bidAmounts: number[];
+  suggestedPrices: number[];
 }

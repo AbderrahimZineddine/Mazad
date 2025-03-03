@@ -49,15 +49,15 @@ export class ValidateBidUpdateGuard implements CanActivate {
     if (req.body.amount || req.body.quantity) {
       const product = await this.productsService.findOne(bid.product.id);
 
-      if (req.body.amount && req.body.amount < product.initialPrice) {
+      if (req.body.amount && req.body.amount < product.price) {
         throw new ForbiddenException(
-          `Bid amount must be at least ${product.initialPrice}`
+          `Bid amount must be at least ${product.price}`
         );
       }
 
-      if (req.body.quantity && req.body.quantity > product.quantity) {
+      if (req.body.quantity && req.body.quantity > product.stock) {
         throw new ForbiddenException(
-          `Requested quantity exceeds available stock (${product.quantity})`
+          `Requested quantity exceeds available stock (${product.stock})`
         );
       }
     }

@@ -14,16 +14,16 @@ export class Product extends Document {
   images: string[];
 
   @Prop({ required: true, min: 0 })
-  initialPrice: number;
+  price: number;
 
   @Prop({ required: true, min: 1 })
-  quantity: number;
+  stock: number;
 
   @Prop({ required: true })
   category: string;
 
   @Prop([Number])
-  bidAmounts: number[];
+  suggestedPrices: number[];
 
   @Prop({ type: Types.ObjectId, ref: "Auction", immutable: true })
   auction: Types.ObjectId;

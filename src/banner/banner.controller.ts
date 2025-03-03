@@ -25,11 +25,13 @@ export class BannerController {
   @Get()
   findAll(
     @Query("region") region: string,
+    @Query("title") title: string,
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100
   ) {
     return this.bannerService.findAll({
       region,
+      title,
       page,
       limit,
     });

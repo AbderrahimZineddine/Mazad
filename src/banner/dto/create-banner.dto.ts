@@ -9,5 +9,6 @@ export class CreateBannerDto {
       region: string;
     
       @IsArray()
+      @IsString({ each: true })
       images: string[];
 }

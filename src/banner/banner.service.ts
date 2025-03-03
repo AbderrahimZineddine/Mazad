@@ -17,12 +17,18 @@ export class BannerService {
 
   async findAll(filters: {
     region?: string;
+    title?: string;
     page: number;
     limit: number;
   }): Promise<Banner[]> {
     const query: any = {};
 
-    if (filters.region) query.region = filters.region;
+    if (filters.region) {
+      query.region = { $regex: filters.region, options: "i" };
+    }
+    if (filters.title) {
+      query.title = { $regex: filters.title, options: "i" };
+    }
 
     return this.bannerModel
       .find(query)
