@@ -86,6 +86,8 @@ export class BidsService {
     const query: any = {};
 
     if (filters.user) query.user = new Types.ObjectId(filters.user);
+
+  
     if (filters.product) query.product = new Types.ObjectId(filters.product);
     if (filters.status) query.status = filters.status;
 
@@ -110,7 +112,7 @@ export class BidsService {
     return this.bidModel
       .find(query)
       .populate("user", "name email")
-      .populate("product", "name initialPrice");
+      .populate("product", "name price");
   }
 
   async findOne(id: string) {
