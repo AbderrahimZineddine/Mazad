@@ -104,12 +104,12 @@ export class AuctionsController {
   async subscribeToAuction(
     @Param("id") auctionId: string,
     @User() user: { _id: Types.ObjectId }, // user.id is a string
-    @Body("usePoints") usePoints: boolean
+    // @Body("usePoints") usePoints: boolean
   ) {
     const auction = await this.auctionsService.subscribe(
       auctionId,
       user._id, // Now passing ObjectId
-      usePoints
+      // usePoints
     );
 
     return {

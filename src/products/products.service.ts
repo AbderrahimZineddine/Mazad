@@ -18,7 +18,7 @@ export class ProductsService {
 
     const newProduct = await this.productModel.create(productData);
     
-    auction.products.push(newProduct.id);
+    // auction.products.push(newProduct.id);
     await this.updateAuctionCategories(auction);
     
     return newProduct;
@@ -42,10 +42,10 @@ export class ProductsService {
     if (filters.category) query.category = filters.category;
     if (filters.name) query.name = { $regex: filters.name, $options: 'i' };
     
-    if (filters.auction) {
-      const auction = await this.auctionModel.findById(filters.auction).select('products');
-      query._id = auction ? { $in: auction.products } : { $in: [] };
-    }
+    // if (filters.auction) {
+    //   const auction = await this.auctionModel.findById(filters.auction).select('products');
+    //   // query._id = auction ? { $in: auction.products } : { $in: [] };
+    // }
 
     return this.productModel.find(query)
       .skip((filters.page - 1) * filters.limit)

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString } from 'class-validator';
+import { IsArray, IsString } from 'class-validator';
 
 export class CreateBannerDto {
     @IsString()
@@ -8,6 +8,6 @@ export class CreateBannerDto {
       @IsString()
       region: string;
     
-      @IsString()
-      image: string;
+      @IsArray()
+      images: string[];
 }

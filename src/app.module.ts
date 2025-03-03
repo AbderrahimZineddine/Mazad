@@ -9,18 +9,20 @@ import { AuctionsModule } from './auctions/auction.module';
 import { AuthModule } from './auth/auth.module';
 import { BidsModule } from './bids/bids.module';
 import { BannerModule } from './banner/banner.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
 
     //TODO ??? 
-    // ConfigModule.forRoot({
-    //   isGlobal: true, // Makes the config available globally
-    // }),
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes the config available globally
+    }),
 
 
     MongooseModule.forRoot(
-      process.env.MONGO_URI || 'mongodb://localhost:27017/auction-app',
+      process.env.MONGO_URI || 'mongodb://localhost:27017/mazad-app',
+      
     ),
     SalesModule,
     AuctionsModule,

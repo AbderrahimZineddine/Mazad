@@ -85,7 +85,7 @@ export class AuctionsService {
   async subscribe(
     auctionId: string,
     userId: Types.ObjectId,
-    usePoints: boolean
+    // usePoints: boolean
   ): Promise<Auction> {
     const auction = await this.auctionModel.findById(auctionId);
     if (!auction) throw new NotFoundException("Auction not found");
@@ -97,14 +97,14 @@ export class AuctionsService {
       throw new BadRequestException("Already subscribed");
     }
 
-    if (usePoints) {
-      if (user.points < auction.subscriptionFeePoints) {
-        throw new BadRequestException('Insufficient points');
-      }
-      user.points -= auction.subscriptionFeePoints;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      await user.save();
-    }
+    // if (usePoints) {
+    //   if (user.points < auction.subscriptionFeePoints) {
+    //     throw new BadRequestException('Insufficient points');
+    //   }
+    //   user.points -= auction.subscriptionFeePoints;
+    //   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    //   await user.save();
+    // }
 
     auction.subscribers.push(userId);
     return await auction.save();

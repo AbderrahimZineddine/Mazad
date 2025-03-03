@@ -1,10 +1,19 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { BannerService } from './banner.service';
-import { CreateBannerDto } from './dto/create-banner.dto';
-import { UpdateBannerDto } from './dto/update-banner.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from "@nestjs/common";
+import { BannerService } from "./banner.service";
+import { CreateBannerDto } from "./dto/create-banner.dto";
+import { UpdateBannerDto } from "./dto/update-banner.dto";
 
-@Controller('banner')
+@Controller("banners")
 export class BannerController {
   constructor(private readonly bannerService: BannerService) {}
 
@@ -14,22 +23,30 @@ export class BannerController {
   }
 
   @Get()
-  findAll() {
-    return this.bannerService.findAll();
+  findAll(
+    @Query("region") region: string,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 100
+  ) {
+    return this.bannerService.findAll({
+      region,
+      page,
+      limit,
+    });
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bannerService.findOne(+id);
+  @Get(":id")
+  findOne(@Param("id") id: string) {
+    return this.bannerService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBannerDto: UpdateBannerDto) {
-    return this.bannerService.update(+id, updateBannerDto);
+  @Patch(":id")
+  update(@Param("id") id: string, @Body() updateBannerDto: UpdateBannerDto) {
+    return this.bannerService.update(id, updateBannerDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bannerService.remove(+id);
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return this.bannerService.remove(id);
   }
 }

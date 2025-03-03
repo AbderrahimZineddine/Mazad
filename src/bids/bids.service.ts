@@ -59,7 +59,7 @@ export class BidsService {
     if (!auction) throw new NotFoundException('Auction not found');
 
     return this.bidModel.aggregate([
-      { $match: { product: { $in: auction.products } } },
+      // { $match: { product: { $in: auction.products } } },
       { $sort: { amount: -1, createdAt: -1 } },
       {
         $group: {
@@ -104,7 +104,7 @@ export class BidsService {
     if (filters.auction) {
       const auction = await this.auctionModel.findById(filters.auction);
       if (!auction) throw new NotFoundException('Auction not found');
-      query.product = { $in: auction.products };
+      // query.product = { $in: auction.products };
     }
 
     return this.bidModel.find(query)
