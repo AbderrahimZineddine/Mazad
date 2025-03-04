@@ -23,13 +23,16 @@ export class ProductsService {
 
     const newProduct = await this.productModel.create(productData);
 
+    // Populate the fields. In Mongoose 6, .populate() returns a Promise.
+
     await this.updateAuctionCategorisAndNumber(auction.id);
 
+    await newProduct.populate("auction");
     return newProduct;
   }
 
   async findOne(id: string) {
-    const product = await this.productModel.findById(id);
+    const product = await this.productModel.findById(id).populate("auction");
     if (!product) throw new NotFoundException("Product not found");
     return product;
   }
@@ -70,6 +73,7 @@ export class ProductsService {
 
     return this.productModel
       .find(query)
+      .select("-auction")
       .skip((filters.page - 1) * filters.limit)
       .limit(filters.limit)
       .sort(filters.sort);
@@ -93,6 +97,8 @@ export class ProductsService {
         await this.updateAuctionCategorisAndNumber(oldAuctionId);
       }
     }
+
+    await product.populate("auction");
 
     return product;
   }

@@ -14,9 +14,8 @@ import {
 import { BidsService } from "./bids.service";
 import { CreateBidDto } from "./dto/create-bid.dto";
 import { UpdateBidDto } from "./dto/update-bid.dto";
-// import { AuthGuard } from "../../guards/auth.guard";
-// import { ValidateBidUpdateGuard } from "../../guards/validate-bid-update.guard";
-// import { ValidateBidDeletionGuard } from "../../guards/validate-bid-deletion.guard";
+import { ValidateBidUpdateGuard } from "../../guards/validate-bid-update.guard";
+import { ValidateBidDeletionGuard } from "../../guards/validate-bid-deletion.guard";
 import { ValidateBidCreationGuard } from "src/guards/validate-bid-creation.guard";
 import { HttpAuthGuard } from "../auth/guards/auth.guard";
 import { Request } from "express";
@@ -104,7 +103,7 @@ export class BidsController {
   }
 
   @Patch(":id")
-  // @UseGuards(ValidateBidUpdateGuard)
+  @UseGuards(ValidateBidUpdateGuard)
   async update(@Param("id") id: string, @Body() updateBidDto: UpdateBidDto) {
     const data = await this.bidsService.update(id, updateBidDto);
 
@@ -116,7 +115,7 @@ export class BidsController {
   }
 
   @Delete(":id")
-  // @UseGuards(ValidateBidDeletionGuard)
+  @UseGuards(ValidateBidDeletionGuard)
   async remove(@Param("id") id: string) {
     const message = await this.bidsService.remove(id);
 
