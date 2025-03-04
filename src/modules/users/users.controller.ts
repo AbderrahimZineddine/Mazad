@@ -16,7 +16,7 @@ import {
 import { UsersService } from "./users.service";
 // import { AuthGuard } from "../../guards/auth.guard";
 // import { AdminGuard } from "../../guards/admin.guard";
-import { RequestWithUser } from "../../types/request-with-user.type";
+// import { RequestWithUser } from "../../types/request-with-user.type";
 import { OwnerOrAdminGuard } from "src/guards/owner-or-admin.guard";
 import { UpdateUserDto } from "./dtos/update-user.dto";
 
@@ -30,29 +30,29 @@ export class UsersController {
   //   return this.usersService.getCurrentUser(req.user.id);
   // }
 
-  // @Get(":userId")
+  @Get(":userId")
   // @UseGuards(OwnerOrAdminGuard)
-  // getUser(@Param("userId") userId: string) {
-  //   return this.usersService.getUser(userId);
-  // }
+  getUser(@Param("userId") userId: string) {
+    return this.usersService.getUser(userId);
+  }
 
-  // @Get()
+  @Get()
   // @UseGuards(AdminGuard)
-  // getAllUsers(
-  //   @Query("name") name?: string,
-  //   @Query("wilaya") wilaya?: string,
-  //   @Query("role") role?: string,
-  //   @Query("page") page = 1,
-  //   @Query("limit") limit = 100
-  // ) {
-  //   return this.usersService.getAllUsers({
-  //     name,
-  //     wilaya,
-  //     role,
-  //     page: Number(page),
-  //     limit: Number(limit),
-  //   });
-  // }
+  getAllUsers(
+    @Query("name") name?: string,
+    @Query("wilaya") wilaya?: string,
+    @Query("role") role?: string,
+    @Query("page") page = 1,
+    @Query("limit") limit = 100
+  ) {
+    return this.usersService.getAllUsers({
+      name,
+      wilaya,
+      role,
+      page: Number(page),
+      limit: Number(limit),
+    });
+  }
 
   // @Patch(":userId")
   // @UseGuards(OwnerOrAdminGuard)

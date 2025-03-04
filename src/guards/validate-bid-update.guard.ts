@@ -8,9 +8,10 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { BidsService } from "../modules/bids/bids.service";
-import { RequestWithUser } from "../types/request-with-user.type";
 import { AuctionsService } from "src/modules/auctions/auction.service";
 import { ProductsService } from "src/modules/products/products.service";
+import { Request } from "express";
+import { UserRoles } from "src/core/enums/user-roles.enum";
 
 @Injectable()
 export class ValidateBidUpdateGuard implements CanActivate {
@@ -21,7 +22,7 @@ export class ValidateBidUpdateGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<RequestWithUser>();
+    const req = context.switchToHttp().getRequest<Request>();
     const bidId = req.params.id;
 
     const bid = await this.bidsService.findOne(bidId);
@@ -31,7 +32,7 @@ export class ValidateBidUpdateGuard implements CanActivate {
     if (!auction) throw new NotFoundException("Auction not found");
 
     // Verify ownership
-    if (bid.user.id !== req.user.id) {
+    if (bid.user.id !== req.user.id && req.user.role !== UserRoles.ADMIN) {
       throw new ForbiddenException("Not authorized to modify this bid");
     }
 

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { CanActivate, ExecutionContext, HttpException, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';

@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 // src/types/request-with-user.type.ts
-import { Request } from "express";
-import { User } from "src/modules/users/schemas/user.schema";
+// import { Request } from "express";
+// import { User } from "src/modules/users/schemas/user.schema";
 
-export interface RequestWithUser extends Omit<Request, "user"> {
-  user: User;
-}
+// export interface RequestWithUser extends Omit<Request, "user"> {
+//   user: User;
+// }

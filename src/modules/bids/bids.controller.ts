@@ -18,17 +18,25 @@ import { UpdateBidDto } from "./dto/update-bid.dto";
 // import { ValidateBidUpdateGuard } from "../../guards/validate-bid-update.guard";
 // import { ValidateBidDeletionGuard } from "../../guards/validate-bid-deletion.guard";
 import { ValidateBidCreationGuard } from "src/guards/validate-bid-creation.guard";
-import { RequestWithUser } from "../../types/request-with-user.type";
+import { HttpAuthGuard } from "../auth/guards/auth.guard";
+import { Request } from "express";
 
 @Controller("bids")
-// @UseGuards(AuthGuard)
+@UseGuards(HttpAuthGuard)
 export class BidsController {
   constructor(private readonly bidsService: BidsService) {}
 
   @Post()
   @UseGuards(ValidateBidCreationGuard)
-  create(@Req() req: RequestWithUser, @Body() createBidDto: CreateBidDto) {
-    return this.bidsService.create("req.user.id", createBidDto);
+  create(@Req() req: Request, @Body() createBidDto: CreateBidDto) {
+
+    const data = this.bidsService.create(req.user.id.toString(), createBidDto);
+    
+    return {
+      success: true,
+      statusCode: 201,
+      data,
+    };
   }
 
   @Get("auction/:auctionId")
