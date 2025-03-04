@@ -27,6 +27,8 @@ export class ProductsController {
     const data = await this.productsService.create(createProductDto);
 
     return {
+      success: true,
+      statusCode: 201,
       data,
     };
   }
