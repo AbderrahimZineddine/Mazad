@@ -28,10 +28,13 @@ export class BidsController {
 
   @Post()
   @UseGuards(ValidateBidCreationGuard)
-  create(@Req() req: Request, @Body() createBidDto: CreateBidDto) {
+  async create(@Req() req: Request, @Body() createBidDto: CreateBidDto) {
+    console.log(req.user.id);
+    const data = await this.bidsService.create(
+      req.user.id.toString(),
+      createBidDto
+    );
 
-    const data = this.bidsService.create(req.user.id.toString(), createBidDto);
-    
     return {
       success: true,
       statusCode: 201,
@@ -39,45 +42,88 @@ export class BidsController {
     };
   }
 
-  @Get("auction/:auctionId")
-  findByAuction(@Param("auctionId") auctionId: string) {
-    return this.bidsService.findByAuction(auctionId);
-  }
+  // @Get("auction/:auctionId")
+  // async findByAuction(@Param("auctionId") auctionId: string) {
+  //   const data = await this.bidsService.findByAuction(auctionId);
+  //   return {
+  //     success: true,
+  //     statusCode: 201,
+  //     data,
+  //   };
+  // }
 
   @Get("product/:productId")
-  findAll(
-    @Query()
-    filters: {
-      user?: string;
-      product?: string;
-      auction?: string;
-      status?: string;
-      minAmount?: number;
-      maxAmount?: number;
-      startDate?: Date;
-      endDate?: Date;
-      page?: number;
-      limit?: number;
-      sort?: string;
-    }
+  async findAll(
+    @Param("productId") productId: string,
+    @Query("name") name?: string,
+    @Query("user") user?: string,
+    @Query("status") status?: string,
+    @Query("region") region?: string,
+    @Query("minAmount") minAmount?: number,
+    @Query("maxAmount") maxAmount?: number,
+    @Query("startDate") startDate?: string, // pass as string to later convert to Date
+    @Query("endDate") endDate?: string,
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 100,
+    @Query("sort") sort: string = "-createdAt"
   ) {
-    return this.bidsService.findAll(filters);
+    const filters = {
+      name,
+      user,
+      status,
+      region,
+      minAmount,
+      maxAmount,
+      startDate,
+      endDate,
+      page,
+      limit,
+      sort,
+    };
+
+    const data = await this.bidsService.findAll(productId, filters);
+
+    return {
+      success: true,
+      statusCode: 200,
+      limit,
+      page,
+      data,
+    };
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.bidsService.findOne(id);
+  async findOne(@Param("id") id: string) {
+    const data = await this.bidsService.findOne(id);
+
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
   }
 
   @Patch(":id")
   // @UseGuards(ValidateBidUpdateGuard)
-  update(@Param("id") id: string, @Body() updateBidDto: UpdateBidDto) {
-    return this.bidsService.update(id, updateBidDto);
+  async update(@Param("id") id: string, @Body() updateBidDto: UpdateBidDto) {
+    const data = await this.bidsService.update(id, updateBidDto);
+
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
   }
 
   @Delete(":id")
   // @UseGuards(ValidateBidDeletionGuard)
-  remove(@Param("id") id: string) {
-    return this.bidsService.remove(id);
+  async remove(@Param("id") id: string) {
+    const message = await this.bidsService.remove(id);
+
+    return {
+      success: true,
+      statusCode: 200,
+      message,
+    };
   }
 }
