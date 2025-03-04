@@ -10,14 +10,13 @@ import { UsersController } from "./users.controller";
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    AuthModule,
+
   ],
   exports: [
-    // Export SPECIFIC Mongoose feature - not the entire module
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     UsersService,
   ],
   providers: [UsersService],
   controllers: [UsersController],
+
 })
 export class UsersModule {}

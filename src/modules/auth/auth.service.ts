@@ -1,151 +1,220 @@
-/* eslint-disable prettier/prettier */
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
-import * as bcrypt from "bcrypt";
-import { User, UserDocument } from "../users/schemas/user.schema";
-import { RefreshToken } from "./schemas/refresh-token.schema";
-import { OTPService } from "./otp.service";
-import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
+import { HttpException, Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { CryptHelper } from 'src/core/helpers/crypt.helper';
+import { AuthToken } from 'src/core/types/auth-token';
+import { JwtPayload } from 'src/core/types/jwt-payload';
+import { AccountVerificationOtp, RefreshToken, RestPasswordOtp } from 'src/models/auth.entity';
+import { v4 } from 'uuid';
+import { UsersService } from '../users/users.service';
+import { User } from '../users/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(RefreshToken.name)
-    private refreshTokenModel: Model<RefreshToken>,
-    private jwtService: JwtService,
-    private otpService: OTPService
-  ) {}
 
-  async register(registerDto: CreateUserDto) {
-    const existingUser = await this.userModel.findOne({
-      phone: registerDto.phone,
-    });
+    constructor(
+        @InjectModel(User.name) private userModel: Model<User>,
+        @InjectModel(RefreshToken.name) private refreshTokenModel: Model<RefreshToken>,
+        @InjectModel(RestPasswordOtp.name) private restPasswordOtpModel: Model<RestPasswordOtp>,
+        @InjectModel(AccountVerificationOtp.name) private accountVerificationOtpModel: Model<AccountVerificationOtp>,
+        private jwtService: JwtService
 
-    if (existingUser) {
-      if (existingUser.isVerified) {
-        throw new UnauthorizedException(
-          "You already have an account. Please login."
-        );
-      }
-      throw new UnauthorizedException(
-        "Pending verification. Enter OTP to verify."
-      );
+    ) { }
+
+    private DEFFAULT_SELECT = 'password role isVerified';
+
+    register = async (
+        data: { region: string, phone: string, password?: string, name: string },
+    ) => {
+
+        const { region, phone, password: nonHashedPass, name } = data;
+
+        const isLoginExist = await this.userModel
+            .exists({ phone });
+
+        if (isLoginExist) {
+            throw new HttpException('This phone number is already registered', 400);
+        }
+
+        const password = nonHashedPass ? await CryptHelper.hash(nonHashedPass) : undefined;
+
+        const user = await this.userModel.create({ region, phone, password, name });
+
+        await this.generateAccountVerificationOtp(user);
+
+        return this.generateToken(user);
     }
 
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    await this.userModel.create({
-      ...registerDto,
-      password: hashedPassword,
-    });
+    login = async (data: {
+        login: string,
+        password?: string
+    },
+        options?: {
+            withoutPassword?: boolean
+        }
+    ) => {
+        const { login, password } = data;
+        const { withoutPassword } = options || {};
 
-    // await this.otpService.sendOTP(registerDto.phone);
-    this.otpService.sendOTP(registerDto.phone);
+        const user = await this.userModel.findOne({
+            $or: [{ email: login }, { phone: login }]
+        }).select(this.DEFFAULT_SELECT);
 
-    return { message: "Registration successful. Verify with OTP." };
-  }
+        if (!user) {
+            throw new HttpException('This email or phone number is not registered', 404);
+        }
 
-  async login(phone: string, password: string) {
-    const user = await this.userModel.findOne({ phone });
+        const isPasswordMatch = password &&
+            await CryptHelper.compare(password, user.password);
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new UnauthorizedException("Invalid credentials");
+        if (withoutPassword || isPasswordMatch) return this.generateToken(user);
+
+        throw new HttpException('Password is incorrect', 400);
+
+
     }
 
-    if (!user.isVerified) {
-      throw new UnauthorizedException("Verify your phone number first");
+    refreshToken = async (refreshToken: string) => {
+        const token = await this.refreshTokenModel.
+            findOne({ token: refreshToken, expires: { $gte: new Date() } })
+            .populate({
+                path: 'user',
+                select: this.DEFFAULT_SELECT
+            });
+
+        if (!token) {
+            throw new HttpException('Invalid refresh token', 400);
+        }
+
+        return this.generateToken(token.user);
+
     }
 
-    return this.generateTokens(user);
-  }
+    forgotPassword = async (login: string) => {
+        const user = await this.userModel.findOne({
+            $or: [{ email: login }, { phone: login }]
+        });
 
-  async verifyOtp(phone: string, otp: string) {
-    // Implement OTP verification logic
-    // const isValid = await this.otpService.verifyOTP(phone, otp);
-    const isValid = this.otpService.verifyOTP(phone, otp);
+        if (!user) {
+            throw new HttpException('This email or phone number is not registered', 404);
+        }
 
-    if (!isValid) {
-      throw new UnauthorizedException("Invalid OTP");
+        const otp = await this.generateRestPasswordOtp(user);
+
+        //TODO: Send OTP to user email or phone number
     }
 
-    const user = await this.userModel.findOneAndUpdate(
-      { phone },
-      { isVerified: true },
-      { new: true }
-    );
+    resetPassword = async (login: string, otp: number, password: string) => {
+        const user = await this.userModel.findOne({
+            $or: [{ email: login }, { phone: login }]
+        }).select(this.DEFFAULT_SELECT);
 
-    return this.generateTokens(user!);
-  }
+        if (!user) {
+            throw new HttpException('This email or phone number is not registered', 404);
+        }
 
-  async refreshTokens(user: UserDocument, oldRefreshToken: string) {
-    await this.refreshTokenModel.deleteOne({ token: oldRefreshToken });
+        const token = await this.verifyRestPasswordOtp(user, otp);
 
-    return this.generateTokens(user);
-  }
 
-  private async generateTokens(user: UserDocument) {
-    const payload = { id: user.id };
 
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.REFRESH_TOKEN_SECRET,
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
-    });
+        user.password = await CryptHelper.hash(password);
+        await Promise.all([user.save(), token.deleteOne()]);
 
-    await this.refreshTokenModel.create({
-      token: refreshToken,
-      user: user._id,
-    });
-
-    return { accessToken, refreshToken };
-  }
-
-  async forgotPassword(phone: string, newPassword: string) {
-    const user = await this.userModel.findOne({ phone });
-
-    if (!user) {
-      throw new NotFoundException("User not found");
+        return this.generateToken(user);
     }
 
-    // Add password reset logic
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.newPassword = hashedPassword;
-    user.newPasswordExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-    await user.save();
+    verifyAccount = async (id: Types.ObjectId, otp: number) => {
+        const token = await this.verifyAccountOtp(id, otp);
 
-    // Send OTP for verification
-    // await this.otpService.sendOTP(phone);
-    this.otpService.sendOTP(phone);
 
-    return {
-      message:
-        "Password reset initiated. Please verify with OTP sent to your phone.",
-    };
-  }
+        await token.deleteOne();
 
-  async resendOtp(phone: string) {
-    const user = await this.userModel.findOne({ phone });
 
-    if (!user) {
-      throw new NotFoundException("User not found");
+        const user = await this.userModel.findByIdAndUpdate(id, { isVerified: true }, { new: true })
+            .select(this.DEFFAULT_SELECT);
+
+        if (!user) {
+            throw new HttpException('User not found', 404);
+        }
+
+        return this.generateToken(user);
     }
 
-    if (user.isVerified) {
-      throw new BadRequestException("User is already verified");
+    private async generateToken(user: User): Promise<AuthToken> {
+        const payload = (new JwtPayload(user)).toPlainObject()
+
+        const accessToken = this.jwtService.sign(payload)
+        const refreshToken = v4()
+        const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
+
+        await this.refreshTokenModel.create(
+            { token: refreshToken, expires, user },
+        )
+
+        return { accessToken, refreshToken }
     }
 
-    // await this.otpService.sendOTP(phone);
-    this.otpService.sendOTP(phone);
+    private async generateRestPasswordOtp(user: User): Promise<number> {
+        const otp = Math.floor(100000 + Math.random() * 900000)
 
-    return {
-      message: "New OTP sent successfully",
-    };
-  }
+        const expires = new Date(Date.now() + 1000 * 60 * 5)
+
+        await this.restPasswordOtpModel.create(
+            { otp, expires, user },
+        )
+
+        return otp
+    }
+
+    async verifyRestPasswordOtp(user: User | string, otp: number) {
+        if (typeof user === 'string') {
+            user = await this.userModel.findOne({
+                $or: [{ email: user }, { phone: user }]
+            }).select(this.DEFFAULT_SELECT);
+        }
+
+        const token = await this.restPasswordOtpModel.
+            findOne({ otp, user, expires: { $gte: new Date() } })
+
+        if (!token)
+            throw new HttpException('Invalid code', 400)
+
+        return token
+
+    }
+
+    private async verifyAccountOtp(user: User | Types.ObjectId, otp: number) {
+        const token = await this.accountVerificationOtpModel.
+            findOne({ otp, user, expires: { $gte: new Date() } })
+
+        if (!token) throw new HttpException('Invalid code', 400)
+
+        return token
+    }
+
+    async generateAccountVerificationOtp(user: User | Types.ObjectId): Promise<number> {
+        const otp = Math.floor(100000 + Math.random() * 900000)
+
+        const expires = new Date(Date.now() + 1000 * 60 * 5)
+
+        await this.accountVerificationOtpModel.create(
+            { otp, expires, user },
+        )
+
+        // TODO: Send OTP to user email or phone number
+
+        return otp
+    }
+
+
+
+
+
+
+
+
+
 }
+
+

@@ -14,7 +14,7 @@ import { AuthModule } from "../auth/auth.module"; // Add this import
       { name: Auction.name, schema: AuctionSchema },
       { name: User.name, schema: UserSchema },
     ]),
-    AuthModule, // Add this line to inherit JwtService
+
   ],
   controllers: [AuctionsController],
   providers: [AuctionsService],

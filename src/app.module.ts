@@ -9,17 +9,24 @@ import { BidsModule } from "./modules/bids/bids.module";
 import { BannerModule } from "./modules/banner/banner.module";
 import { ConfigModule } from "@nestjs/config";
 import { ProductsModule } from "./modules/products/products.module";
+import { JwtAuthModule } from "./core/module/jwt-auth.module";
+import { DatabaseModule } from "./core/module/database.module";
+import { APP_FILTER } from "@nestjs/core";
+import { HttpExceptionFilter } from "./core/interceptors/http-exception.filter";
 
 @Module({
   imports: [
-    //TODO ???
+
     ConfigModule.forRoot({
       isGlobal: true, // Makes the config available globally
     }),
 
-    MongooseModule.forRoot(
-      process.env.MONGO_URI || "mongodb://localhost:27017/mazad-app"
+    DatabaseModule.forRoot(
+      'MAZAD'
     ),
+
+    JwtAuthModule.register(),
+
     AuctionsModule,
     UsersModule,
     ProductsModule,
@@ -27,5 +34,12 @@ import { ProductsModule } from "./modules/products/products.module";
     BidsModule,
     BannerModule,
   ],
+
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ]
 })
-export class AppModule {}
+export class AppModule { }

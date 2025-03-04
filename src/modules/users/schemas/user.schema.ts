@@ -1,15 +1,16 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { AbstractSchema } from 'src/core/models/abstract-schema';
 
 
 @Schema({ timestamps: true })
-export class User extends Document {
+export class User extends AbstractSchema {
   @Prop({ required: true })
   name: string;
 
   @Prop({ required: true })
-  wilaya: string;
+  region: string;
 
   @Prop({ required: true, unique: true })
   phone: string;
@@ -17,7 +18,7 @@ export class User extends Document {
   @Prop({ default: 0 })
   points: number;
 
-  @Prop({ 
+  @Prop({
     enum: ['User', 'Admin'],
     default: 'User'
   })

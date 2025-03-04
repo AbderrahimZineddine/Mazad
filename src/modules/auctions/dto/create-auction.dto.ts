@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { 
     IsString, IsDate,  
-    IsNotEmpty, MinDate, 
+    IsNotEmpty, MinDate,
+    IsNumber, 
   } from 'class-validator';
   import { Type } from 'class-transformer';
   
@@ -19,9 +20,8 @@ import {
     @IsNotEmpty()
     region: string;
   
-    // @IsNumber()
-    // @Min(0)
-    // subscriptionFeeDinar: number;
+    @IsNumber()
+    subscriptionFeeDinar: number;
   
     // @IsNumber()
     // @Min(0)

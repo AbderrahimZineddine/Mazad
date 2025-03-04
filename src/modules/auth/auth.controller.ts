@@ -1,85 +1,119 @@
-/* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get, UseGuards } from "@nestjs/common";
-import { AuthService } from "./auth.service";
-import { User } from "src/decorators/user.decorator";
-import { CreateUserDto } from "src/modules/users/dtos/create-user.dto";
-import { RtAuthGuard } from "src/guards/rt-auth.guard";
-import { UserDocument } from "src/modules/users/schemas/user.schema";
-import { IsNotEmpty, IsString, MinLength } from "class-validator";
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { LoginBodyDto } from './dto/login.dto';
+import { ApiResult } from 'src/core/types/api-response';
+import { RegisterBodyDto } from './dto/register.dto';
+import { RefreshTokenQueryDto } from './dto/refresh-token.dto';
+import { CheckResetCodeBodyDto, ForgotPassBodyDto, ResetPassBodyDto } from './dto/reset-password.dto';
+import { HttpAuthGuard, UnCheckVerified } from './guards/auth.guard';
+import { VerifyAccountBodyDto } from './dto/verify-account.dto';
+import { CurrentUser } from './decorators/auth.decorator';
+import { Types } from 'mongoose';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
-// DTO Classes
-class ForgotPasswordDto {
-  // @IsPhoneNumber()
-  @IsString()
-  phone: string;
-
-  @IsString()
-  @MinLength(4)
-  newPassword: string;
-}
-
-class ResendOtpDto {
-  // @IsPhoneNumber()
-  @IsString()
-  phone: string;
-}
-
-class LoginDto {
-  // @IsPhoneNumber()
-  @IsString()
-  phone: string;
-
-  @IsString()
-  @IsNotEmpty()
-  password: string;
-}
-
-@Controller("auth")
+@Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
-  @Post("register")
-  async register(@Body() registerDto: CreateUserDto) {
-    return this.authService.register(registerDto);
+
+  @Post('login') //* AUTH | Login ~ {{host}}/auth/login
+  async login(
+    @Body() body: LoginBodyDto
+  ): Promise<ApiResult> {
+    const { login, password } = body;
+
+    const tokens = await this.authService.login({ login, password });
+
+    return { tokens, message: 'Login successfully' };
   }
 
-  @Post("verify-otp")
-  async verifyOtp(@Body() body: { phone: string; otp: string }) {
-    return this.authService.verifyOtp(body.phone, body.otp);
-  }
-
-  @Post("login")
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto.phone, loginDto.password);
-  }
-
-  @UseGuards(RtAuthGuard)
-  @Get("refresh")
-  async refreshToken(
-    @User() user: UserDocument,
-    @Body("refreshToken") refreshToken: string
+  @Post('register')
+  async register(
+    @Body() body: RegisterBodyDto
   ) {
-    return this.authService.refreshTokens(user, refreshToken);
+    const { region, phone, password, name } = body;
+
+    const tokens = await this.authService.register({ region, phone, password, name });
+
+    return { tokens, message: 'Register successfully' };
   }
 
-  @Post("forgot-password")
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    const result = await this.authService.forgotPassword(
-      forgotPasswordDto.phone,
-      forgotPasswordDto.newPassword
-    );
-    return {
-      success: true,
-      data: result,
-    };
+  @Get('refresh-token')
+  async refreshToken(
+    @Query() query: RefreshTokenQueryDto
+  ) {
+    const { refreshToken } = query;
+
+    const tokens = await this.authService.refreshToken(refreshToken);
+
+    return { tokens, message: 'Refresh token successfully' };
   }
 
-  @Post("resend-otp") // Changed to POST as it modifies server state
-  async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
-    const result = await this.authService.resendOtp(resendOtpDto.phone);
-    return {
-      success: true,
-      data: result,
-    };
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body() body: ForgotPassBodyDto
+  ) {
+    const { email } = body;
+
+    await this.authService.forgotPassword(email);
+
+    return { message: 'Reset code sent successfully' };
   }
+
+  @Post('check-reset-code')
+  async checkResetCode(
+    @Body() body: CheckResetCodeBodyDto
+  ) {
+    const { email, otp } = body;
+
+    await this.authService.verifyRestPasswordOtp(email, otp);
+
+    return { message: 'Reset code verified successfully' };
+  }
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body() body: ResetPassBodyDto
+  ) {
+    const { email, otp, password } = body;
+
+    const tokens = await this.authService.resetPassword(email, otp, password);
+
+    return { tokens, message: 'Password reset successfully' };
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(HttpAuthGuard)
+  @UnCheckVerified()
+  @Post('resend-verification')
+  async resendVerification(
+    @CurrentUser() userId: Types.ObjectId
+  ) {
+    await this.authService.generateAccountVerificationOtp(userId);
+
+    return { message: 'Verification code sent successfully' };
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(HttpAuthGuard)
+  @UnCheckVerified()
+  @Post('verify-account')
+  async verifyAccount(
+    @Body() body: VerifyAccountBodyDto,
+    @CurrentUser() userId: Types.ObjectId
+  ) {
+    const { otp } = body;
+
+    const tokens = await this.authService.verifyAccount(userId, otp);
+
+    return { tokens, message: 'Account verified successfully' };
+  }
+
+
+
+
+
+
+
+
 }
