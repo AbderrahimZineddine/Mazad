@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Module } from "@nestjs/common";
 // import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from "@nestjs/mongoose";
 import { UsersModule } from "./modules/users/users.module";
 import { AuctionsModule } from "./modules/auctions/auction.module";
 import { AuthModule } from "./modules/auth/auth.module";
@@ -22,7 +21,7 @@ import { HttpExceptionFilter } from "./core/interceptors/http-exception.filter";
     }),
 
     DatabaseModule.forRoot(
-      'MAZAD'
+      'mazad-app'
     ),
 
     JwtAuthModule.register(),

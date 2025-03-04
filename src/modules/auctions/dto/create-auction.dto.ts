@@ -21,7 +21,7 @@ import {
     region: string;
   
     @IsNumber()
-    subscriptionFeeDinar: number;
+    price: number;
   
     // @IsNumber()
     // @Min(0)
