@@ -25,7 +25,7 @@ export class Product extends Document {
   @Prop([Number])
   suggestedPrices: number[];
 
-  @Prop({ type: Types.ObjectId, ref: "Auction", immutable: true })
+  @Prop({ type: Types.ObjectId, ref: "Auction" })
   auction: Types.ObjectId;
 }
 

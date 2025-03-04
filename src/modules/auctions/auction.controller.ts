@@ -91,13 +91,13 @@ export class AuctionsController {
 
   @Delete(":id")
   // @UseGuards(AdminGuard)
-  @HttpCode(204)
+  // @HttpCode(204)
   async deleteAuction(@Param("id") id: string) {
-    await this.auctionsService.remove(id);
+    const message = await this.auctionsService.remove(id);
     return {
       success: true,
       statusCode: 204,
-      message: "Auction deleted successfully",
+      message,
     };
   }
 
@@ -115,6 +115,7 @@ export class AuctionsController {
 
     return {
       success: true,
+      statusCode: 200,
       data: auction,
     };
   }

@@ -84,9 +84,11 @@ export class AuctionsService {
     return auction;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<string> {
     const result = await this.auctionModel.findByIdAndDelete(id);
     if (!result) throw new NotFoundException("Auction not found");
+
+    return "Auction Deleted Succeffully";
   }
 
   async subscribe(

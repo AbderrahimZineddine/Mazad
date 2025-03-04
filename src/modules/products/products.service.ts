@@ -5,6 +5,7 @@ import { Model } from "mongoose";
 import { Product } from "./schemas/product.schema";
 import { Auction } from "../auctions/schemas/auction.schema";
 import { CreateProductDto } from "./dto/create-product.dto";
+import { UpdateProductDto } from "./dto/update-product.dto";
 
 @Injectable()
 export class ProductsService {
@@ -15,12 +16,14 @@ export class ProductsService {
 
   async create(productData: CreateProductDto) {
     const auction = await this.auctionModel.findById(productData.auction);
-    if (!auction) throw new NotFoundException("Auction not found");
+    if (!auction)
+      throw new NotFoundException(
+        `There is not Auction with id : ${productData.auction}`
+      );
 
     const newProduct = await this.productModel.create(productData);
 
-    // auction.products.push(newProduct.id);
-    await this.updateAuctionCategories(auction);
+    await this.updateAuctionCategorisAndNumber(auction.id);
 
     return newProduct;
   }
@@ -49,12 +52,12 @@ export class ProductsService {
         throw new NotFoundException(`Auction with id ${auctionId} not found`);
       }
     } catch (error) {
-      if (error.name === 'CastError') {
+      if (error.name === "CastError") {
         throw new NotFoundException(`Auction with id ${auctionId} not found`);
       }
       throw error;
     }
-    
+
     query.auction = auctionId;
 
     if (filters.category) {
@@ -72,19 +75,23 @@ export class ProductsService {
       .sort(filters.sort);
   }
 
-  async update(id: string, updateData: Partial<Product>) {
-    const product = await this.productModel.findByIdAndUpdate(
-      id,
-      updateData, // Use converted payload
-      { new: true, runValidators: true }
-    );
-
+  async update(id: string, updateData: UpdateProductDto) {
+    // Fetch the existing product
+    const product = await this.productModel.findById(id);
     if (!product) throw new NotFoundException("Product not found");
 
-    if (updateData.category) {
-      const auction = await this.auctionModel.findOne({ products: product.id });
-      if (!auction) throw new NotFoundException("Product not in any auction");
-      await this.updateAuctionCategories(auction);
+    // Store the old auction before updating
+    const oldAuctionId = product.auction.toString();
+
+    Object.assign(product, updateData);
+
+    await product.save();
+
+    if (updateData.category || updateData.auction) {
+      await this.updateAuctionCategorisAndNumber(product.auction.toString());
+      if (updateData.auction && oldAuctionId != updateData.auction) {
+        await this.updateAuctionCategorisAndNumber(oldAuctionId);
+      }
     }
 
     return product;
@@ -94,24 +101,35 @@ export class ProductsService {
     const product = await this.productModel.findByIdAndDelete(id);
     if (!product) throw new NotFoundException("Product not found");
 
-    // Update auctions that contained this product
-    await this.auctionModel.updateMany(
-      { products: id },
-      { $pull: { products: id } }
-    );
-
-    return { message: "Product deleted successfully" };
+    await this.updateAuctionCategorisAndNumber(product.auction.toString());
+    return "Product deleted successfully";
   }
 
-  private async updateAuctionCategories(auction: any) {
+  private async updateAuctionCategorisAndNumber(auctionId: string) {
+    // Get all products associated with the auction
     const products = await this.productModel.find({
-      _id: { $in: auction.products },
+      auction: auctionId,
     });
+
+    if (!products) {
+      throw new NotFoundException(`Auction with id ${auctionId} not found`);
+    }
+
+    // Get unique categories from the products (ignoring falsy values)
     const uniqueCategories = [
       ...new Set(products.map((p) => p.category).filter(Boolean)),
     ];
-    auction.categories = uniqueCategories;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    await auction.save();
+
+    const auction = await this.auctionModel.findByIdAndUpdate(
+      auctionId,
+      {
+        categories: uniqueCategories,
+        productsNumber: products.length,
+      },
+      { new: true, runValidators: true }
+    );
+    if (!auction) {
+      throw new NotFoundException(`Auction with id ${auctionId} not found`);
+    }
   }
 }

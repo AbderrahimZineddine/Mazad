@@ -26,8 +26,8 @@ export class Auction extends Document {
   @Prop({ required: true })
   price: number;
 
-  // @Prop({ required: true })
-  // subscriptionFeePoints: number;
+  @Prop({ default : 0})
+  productsNumber: number;
 
   @Prop([{ type: Types.ObjectId, ref: "User" }])
   subscribers: Types.ObjectId[];
