@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 
 
 import { Schema as DSchema, Prop } from "@nestjs/mongoose";
@@ -51,6 +52,6 @@ export class AccountVerificationOtp extends AbstractSchema {
     @Prop()
     otp: number
 
-    @Prop({ type: Date, index: { expireAfterSeconds: 2 } })
+    @Prop({ type: Date, index: { expireAfterSeconds: 100 } })
     expires: Date
 }

@@ -3,71 +3,104 @@
 import {
   Controller,
   Get,
-  Post,
-  Patch,
-  Delete,
+  // Post,
+  // Patch,
+  // Delete,
   Query,
   Param,
+  Patch,
   Body,
-  UseGuards,
+  Delete,
   Req,
-  BadRequestException,
+  UseGuards,
+  // Body,
+  // UseGuards,
+  // Req,
+  // BadRequestException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
+import { UpdateUserDto } from "./dtos/update-user.dto";
+import { Request } from "express";
+import { HttpAuthGuard } from "../auth/guards/auth.guard";
 // import { AuthGuard } from "../../guards/auth.guard";
 // import { AdminGuard } from "../../guards/admin.guard";
 // import { RequestWithUser } from "../../types/request-with-user.type";
-import { OwnerOrAdminGuard } from "src/guards/owner-or-admin.guard";
-import { UpdateUserDto } from "./dtos/update-user.dto";
+// import { OwnerOrAdminGuard } from "src/guards/owner-or-admin.guard";
+// import { UpdateUserDto } from "./dtos/update-user.dto";
 
 @Controller("users")
-// @UseGuards(AuthGuard)
+@UseGuards(HttpAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Get("me")
-  // getCurrentUser(@Req() req: RequestWithUser) {
-  //   return this.usersService.getCurrentUser(req.user.id);
-  // }
+  @Get("me")
+  getCurrentUser(@Req() req: Request) {
+    return this.usersService.getCurrentUser(req.user.id.toString());
+  }
 
   @Get(":userId")
   // @UseGuards(OwnerOrAdminGuard)
-  getUser(@Param("userId") userId: string) {
-    return this.usersService.getUser(userId);
+  async getUser(@Param("userId") userId: string) {
+    const data = await this.usersService.getUser(userId);
+
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
   }
 
   @Get()
   // @UseGuards(AdminGuard)
-  getAllUsers(
+  async getAllUsers(
     @Query("name") name?: string,
     @Query("region") region?: string,
     @Query("role") role?: string,
     @Query("page") page = 1,
     @Query("limit") limit = 100
   ) {
-    return this.usersService.getAllUsers({
+    const data = await this.usersService.getAllUsers({
       name,
       region,
       role,
       page: Number(page),
       limit: Number(limit),
     });
+
+    return {
+      success: true,
+      statusCode: 200,
+      limit,
+      page,
+      data,
+    };
   }
 
-  // @Patch(":userId")
+  @Patch(":userId")
   // @UseGuards(OwnerOrAdminGuard)
-  // updateUser(
-  //   @Param("userId") userId: string,
-  //   @Body() updateUserDto: UpdateUserDto
-  // ) {
-  //   return this.usersService.updateUser(userId, updateUserDto);
-  // }
+  async updateUser(
+    @Param("userId") userId: string,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+    const data = await this.usersService.updateUser(userId, updateUserDto);
 
-  // @Delete(":userId")
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
+  }
+
+  @Delete(":userId")
   // @UseGuards(OwnerOrAdminGuard)
-  // deleteUser(@Param("userId") userId: string) {
-  //   return this.usersService.deleteUser(userId);
-  // }
+  async deleteUser(@Param("userId") userId: string) {
+    const message = await this.usersService.deleteUser(userId);
+    return {
+      success: true,
+      statusCode: 204,
+      message,
+    };
+  }
 
   // @Post(":userId/add-points")
   // @UseGuards(AdminGuard)
