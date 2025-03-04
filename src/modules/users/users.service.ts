@@ -41,7 +41,7 @@ export class UsersService {
 
   async getAllUsers(filters: {
     name?: string;
-    wilaya?: string;
+    region?: string;
     role?: string;
     page: number;
     limit: number;
@@ -49,7 +49,7 @@ export class UsersService {
     const query: any = {};
 
     if (filters.name) query.name = { $regex: filters.name, $options: "i" };
-    if (filters.wilaya) query.wilaya = filters.wilaya;
+    if (filters.region) query.region = filters.region;
     if (filters.role) query.role = filters.role;
 
     return this.userModel

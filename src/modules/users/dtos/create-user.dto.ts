@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 // create-user.dto.ts
-import { IsString, IsNotEmpty, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength } from "class-validator";
 
 export class CreateUserDto {
   @IsString()
@@ -9,7 +9,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  wilaya: string;
+  region: string;
 
   @IsString()
   @IsNotEmpty()

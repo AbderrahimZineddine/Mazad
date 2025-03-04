@@ -40,14 +40,14 @@ export class UsersController {
   // @UseGuards(AdminGuard)
   getAllUsers(
     @Query("name") name?: string,
-    @Query("wilaya") wilaya?: string,
+    @Query("region") region?: string,
     @Query("role") role?: string,
     @Query("page") page = 1,
     @Query("limit") limit = 100
   ) {
     return this.usersService.getAllUsers({
       name,
-      wilaya,
+      region,
       role,
       page: Number(page),
       limit: Number(limit),
