@@ -18,39 +18,73 @@ export class BannerController {
   constructor(private readonly bannerService: BannerService) {}
 
   @Post()
-  create(@Body() createBannerDto: CreateBannerDto) {
-    return this.bannerService.create(createBannerDto);
+  async create(@Body() createBannerDto: CreateBannerDto) {
+    const data = await this.bannerService.create(createBannerDto);
+
+    return {
+      success: true,
+      statusCode: 201,
+      data,
+    };
   }
 
   @Get()
-  findAll(
+  async findAll(
     @Query("region") region: string,
     @Query("title") title: string,
     @Query("page") page: number = 1,
     @Query("limit") limit: number = 100,
     @Query("sort") sort: string = "-createdAt"
   ) {
-    return this.bannerService.findAll({
+    const data = await this.bannerService.findAll({
       region,
       title,
       page,
       limit,
       sort,
     });
+
+    return {
+      success: true,
+      statusCode: 200,
+      limit,
+      page,
+      data,
+    };
   }
 
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.bannerService.findOne(id);
+  async findOne(@Param("id") id: string) {
+    const data = await this.bannerService.findOne(id);
+
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateBannerDto: UpdateBannerDto) {
-    return this.bannerService.update(id, updateBannerDto);
+  async update(
+    @Param("id") id: string,
+    @Body() updateBannerDto: UpdateBannerDto
+  ) {
+    const data = await this.bannerService.update(id, updateBannerDto);
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
   }
 
   @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.bannerService.remove(id);
+  async remove(@Param("id") id: string) {
+    const message = await this.bannerService.remove(id);
+
+    return {
+      success: true,
+      statusCode: 200,
+      message,
+    };
   }
 }

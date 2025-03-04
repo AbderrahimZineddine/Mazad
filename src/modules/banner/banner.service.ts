@@ -20,7 +20,7 @@ export class BannerService {
     title?: string;
     page: number;
     limit: number;
-    sort : string;
+    sort: string;
   }): Promise<Banner[]> {
     const query: any = {};
 
@@ -57,8 +57,10 @@ export class BannerService {
     return banner;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string): Promise<string> {
     const result = await this.bannerModel.findByIdAndDelete(id).exec();
     if (!result) throw new NotFoundException("Banner not found");
+
+    return "Banner deleted Successfully";
   }
 }
