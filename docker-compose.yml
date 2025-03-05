@@ -7,7 +7,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     container_name: MazadAPI
-    
+
     ports:
       - "3001:3000"
     volumes:
@@ -19,4 +19,14 @@ services:
       - 8.8.4.4 # Google DNS
     env_file:
       - .env.development.local
+    depends_on:
+      - monogolocaldb
 
+  monogolocaldb:
+    image: mongo
+    container_name: MongoDB
+    attach: false
+    ports:
+      - "27018:27017"
+    volumes:
+      - ./.data/db:/data/db
