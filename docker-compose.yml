@@ -19,7 +19,4 @@ services:
       - 8.8.4.4 # Google DNS
     env_file:
       - .env.development.local
-    depends_on:
-      - monogolocaldb
-
 
