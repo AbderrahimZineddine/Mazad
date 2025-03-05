@@ -6,7 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { Bid } from "./schemas/bid.schema";
 import { Auction } from "../auctions/schemas/auction.schema";
 import { Product } from "../products/schemas/product.schema";
@@ -48,48 +48,76 @@ export class BidsService {
       );
     }
 
-    return this.bidModel.create({
+    const createdBid = await this.bidModel.create({
       ...createBidDto,
       user: userId,
     });
+
+    // Populate the fields. In Mongoose 6, .populate() returns a Promise.
+    await createdBid.populate(
+      "user",
+      "-password -newPassword -newPasswordExpires"
+    );
+    await createdBid.populate("product", "-auction");
+
+    return createdBid;
   }
 
-  async findByAuction(auctionId: string) {
-    const auction = await this.auctionModel.findById(auctionId);
-    if (!auction) throw new NotFoundException("Auction not found");
+  // async findByAuction(auctionId: string) {
+  //   const auction = await this.auctionModel.findById(auctionId);
+  //   if (!auction) throw new NotFoundException("Auction not found");
 
-    return this.bidModel.aggregate([
-      // { $match: { product: { $in: auction.products } } },
-      { $sort: { amount: -1, createdAt: -1 } },
-      {
-        $group: {
-          _id: "$product",
-          bids: { $push: "$$ROOT" },
-        },
-      },
-      {
-        $lookup: {
-          from: "products",
-          localField: "_id",
-          foreignField: "_id",
-          as: "product",
-          pipeline: [{ $project: { name: 1, image: 1, description: 1 } }],
-        },
-      },
-      { $unwind: "$product" },
-      { $project: { product: 1, topBids: { $slice: ["$bids", 3] } } },
-      { $sort: { "product.name": 1 } },
-    ]);
-  }
+  //   return this.bidModel.aggregate([
+  //     // { $match: { product: { $in: auction.products } } },
+  //     { $sort: { amount: -1, createdAt: -1 } },
+  //     {
+  //       $group: {
+  //         _id: "$product",
+  //         bids: { $push: "$$ROOT" },
+  //       },
+  //     },
+  //     {
+  //       $lookup: {
+  //         from: "products",
+  //         localField: "_id",
+  //         foreignField: "_id",
+  //         as: "product",
+  //         pipeline: [{ $project: { name: 1, image: 1, description: 1 } }],
+  //       },
+  //     },
+  //     { $unwind: "$product" },
+  //     { $project: { product: 1, topBids: { $slice: ["$bids", 3] } } },
+  //     { $sort: { "product.name": 1 } },
+  //   ]);
+  // }
 
-  async findAll(filters: any) {
+  async findAll(
+    productId: string,
+    filters: {
+      name?: string;
+      user?: string;
+      status?: string;
+      region?: string;
+      minAmount?: number;
+      maxAmount?: number;
+      startDate?: string;
+      endDate?: string;
+      page: number;
+      limit: number;
+      sort: string;
+      auction?: string;
+    }
+  ) {
     const query: any = {};
 
-    if (filters.user) query.user = new Types.ObjectId(filters.user);
+    // Use the productId from the URL param to build the query
+    query.product = productId;
 
-  
-    if (filters.product) query.product = new Types.ObjectId(filters.product);
+    if (filters.user) query.user = filters.user;
+
+    if (filters.name) query.name = { $regex: filters.name, options: "i" };
     if (filters.status) query.status = filters.status;
+    if (filters.region) query.region = { $regex: filters.region, options: "i" };
 
     if (filters.minAmount || filters.maxAmount) {
       query.amount = {};
@@ -103,28 +131,32 @@ export class BidsService {
       if (filters.endDate) query.createdAt.$lte = new Date(filters.endDate);
     }
 
-    if (filters.auction) {
-      const auction = await this.auctionModel.findById(filters.auction);
-      if (!auction) throw new NotFoundException("Auction not found");
-      // query.product = { $in: auction.products };
-    }
-
     return this.bidModel
       .find(query)
-      // .populate("user", "name email")  //TODO return this
-      .populate("product", "name price");
+      .populate("user", "-password -newPassword -newPasswordExpires")
+      .select("-product")
+      .skip((filters.page - 1) * filters.limit)
+      .limit(filters.limit)
+      .sort(filters.sort);
   }
 
   async findOne(id: string) {
-    const bid = await this.bidModel.findById(id);
+    const bid = await this.bidModel
+      .findById(id)
+      .populate("user", "-password -newPassword -newPasswordExpires")
+      .populate("product", "-auction");
+
     if (!bid) throw new NotFoundException("Bid not found");
     return bid;
   }
 
   async update(id: string, updateBidDto: UpdateBidDto) {
-    const bid = await this.bidModel.findByIdAndUpdate(id, updateBidDto, {
-      new: true,
-    });
+    const bid = await this.bidModel
+      .findByIdAndUpdate(id, updateBidDto, {
+        new: true,
+      })
+      .populate("user", "-password -newPassword -newPasswordExpires")
+      .populate("product", "-auction");
     if (!bid) throw new NotFoundException("Bid not found");
     return bid;
   }
@@ -132,6 +164,6 @@ export class BidsService {
   async remove(id: string) {
     const bid = await this.bidModel.findByIdAndDelete(id);
     if (!bid) throw new NotFoundException("Bid not found");
-    return bid;
+    return "Bid Deleted Successfully";
   }
 }

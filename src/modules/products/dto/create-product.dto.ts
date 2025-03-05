@@ -33,6 +33,6 @@ export class CreateProductDto {
 
   @IsArray()
   @IsNumber({}, { each: true })
-  @Min(1, { each: true })
+  @Min(0, { each: true })
   suggestedPrices: number[];
 }

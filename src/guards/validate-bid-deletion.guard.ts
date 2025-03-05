@@ -9,7 +9,8 @@ import {
 } from "@nestjs/common";
 import { BidsService } from "../modules/bids/bids.service";
 import { UsersService } from "../modules/users/users.service";
-import { RequestWithUser } from "../types/request-with-user.type";
+import { Request } from "express";
+import { UserRoles } from "src/core/enums/user-roles.enum";
 
 @Injectable()
 export class ValidateBidDeletionGuard implements CanActivate {
@@ -19,16 +20,15 @@ export class ValidateBidDeletionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<RequestWithUser>();
+    const req = context.switchToHttp().getRequest<Request>();
     const bidId = req.params.id;
 
     const bid = await this.bidsService.findOne(bidId);
     if (!bid) throw new NotFoundException("Bid not found");
 
-    const user = await this.usersService.getUser(req.user.id);
 
     // Check if user is owner or admin
-    if (bid.user.id !== req.user.id && user.role !== "Admin") {
+    if (bid.user.id !== req.user.id && req.user.role !== UserRoles.ADMIN) {
       throw new ForbiddenException("Not authorized to delete this bid");
     }
 

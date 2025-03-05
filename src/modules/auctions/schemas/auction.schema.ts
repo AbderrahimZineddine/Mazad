@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 // src/auctions/schemas/auction.schema.ts
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document, Types } from "mongoose";
 
 @Schema({ timestamps: true })
 export class Auction extends Document {
@@ -17,21 +17,20 @@ export class Auction extends Document {
   @Prop([String])
   categories: string[];
 
-  @Prop({ 
-    enum: ['Open', 'Closed'],
-    default: 'Open'
+  @Prop({
+    enum: ["Open", "Closed"],
+    default: "Open",
   })
   status: string;
 
-  // @Prop({ required: true })
-  // subscriptionFeeDinar: number;
+  @Prop({ required: true })
+  price: number;
 
-  // @Prop({ required: true })
-  // subscriptionFeePoints: number;
+  @Prop({ default : 0})
+  productsNumber: number;
 
-  @Prop([{ type: Types.ObjectId, ref: 'User'  }])
+  @Prop([{ type: Types.ObjectId, ref: "User" }])
   subscribers: Types.ObjectId[];
-  
 }
 
 export const AuctionSchema = SchemaFactory.createForClass(Auction);

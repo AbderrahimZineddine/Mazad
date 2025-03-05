@@ -8,9 +8,11 @@ import {
   ForbiddenException,
 } from "@nestjs/common";
 import { BidsService } from "../modules/bids/bids.service";
-import { RequestWithUser } from "../types/request-with-user.type";
 import { AuctionsService } from "src/modules/auctions/auction.service";
 import { ProductsService } from "src/modules/products/products.service";
+import { Request } from "express";
+import { UserRoles } from "src/core/enums/user-roles.enum";
+import { Auction } from "src/modules/auctions/schemas/auction.schema";
 
 @Injectable()
 export class ValidateBidUpdateGuard implements CanActivate {
@@ -21,23 +23,30 @@ export class ValidateBidUpdateGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<RequestWithUser>();
+    const req = context.switchToHttp().getRequest<Request>();
     const bidId = req.params.id;
 
     const bid = await this.bidsService.findOne(bidId);
+
     if (!bid) throw new NotFoundException("Bid not found");
 
-    const auction = await this.auctionsService.findByProduct(bid.product.id);
-    if (!auction) throw new NotFoundException("Auction not found");
+    const product = await this.productsService.findOne(bid.product.id);
+    if (!product) throw new NotFoundException("Product not found");
 
     // Verify ownership
-    if (bid.user.id !== req.user.id) {
+    if (bid.user.id !== req.user.id && req.user.role !== UserRoles.ADMIN) {
       throw new ForbiddenException("Not authorized to modify this bid");
     }
-
+    console.log(product.auction);
     // Check auction status
-    if (auction.status === "Closed") {
-      throw new ForbiddenException("Auction is closed for bidding");
+    if (
+      (product.auction as unknown as Auction).status === "Closed" &&
+      req.body &&
+      req.body.amount
+    ) {
+      throw new ForbiddenException(
+        "Auction is closed , you cannot modify the bid amount"
+      );
     }
 
     // Check bid status
@@ -47,8 +56,6 @@ export class ValidateBidUpdateGuard implements CanActivate {
 
     // Validate amount/quantity if present
     if (req.body.amount || req.body.quantity) {
-      const product = await this.productsService.findOne(bid.product.id);
-
       if (req.body.amount && req.body.amount < product.price) {
         throw new ForbiddenException(
           `Bid amount must be at least ${product.price}`

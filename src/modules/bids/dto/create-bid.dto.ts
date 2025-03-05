@@ -7,7 +7,7 @@ export class CreateBidDto {
   product: string;
 
   @IsNumber()
-  @Min(1)
+  @Min(0)
   amount: number;
 
   @IsNumber()

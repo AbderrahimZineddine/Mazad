@@ -41,7 +41,7 @@ export class UsersService {
 
   async getAllUsers(filters: {
     name?: string;
-    wilaya?: string;
+    region?: string;
     role?: string;
     page: number;
     limit: number;
@@ -49,7 +49,8 @@ export class UsersService {
     const query: any = {};
 
     if (filters.name) query.name = { $regex: filters.name, $options: "i" };
-    if (filters.wilaya) query.wilaya = filters.wilaya;
+    if (filters.region)
+      query.region = { $regex: filters.region, $options: "i" };
     if (filters.role) query.role = filters.role;
 
     return this.userModel
@@ -75,17 +76,19 @@ export class UsersService {
     return user;
   }
 
-  async deleteUser(userId: string): Promise<void> {
+  async deleteUser(userId: string): Promise<string> {
     const user = await this.userModel.findByIdAndDelete(userId);
     if (!user) throw new NotFoundException("User not found");
+
+    return "User Deleted Successfully"
   }
 
-  async addUserPoints(userId: string, points: number): Promise<User> {
-    const user = await this.userModel
-      .findByIdAndUpdate(userId, { $inc: { points } }, { new: true })
-      .select("-password -newPassword -newPasswordExpires");
+  // async addUserPoints(userId: string, points: number): Promise<User> {
+  //   const user = await this.userModel
+  //     .findByIdAndUpdate(userId, { $inc: { points } }, { new: true })
+  //     .select("-password -newPassword -newPasswordExpires");
 
-    if (!user) throw new NotFoundException("User not found");
-    return user;
-  }
+  //   if (!user) throw new NotFoundException("User not found");
+  //   return user;
+  // }
 }

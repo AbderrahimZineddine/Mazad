@@ -1,0 +1,25 @@
+name: MazadAPI
+
+services:
+  mazadapi-dev:
+    image: mazadapi
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: MazadAPI
+    
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./src:/usr/src/app/src
+      - ./libs:/usr/src/app/libs
+    command: bash -c "npm run build && npm run start:prod"
+    dns:
+      - 8.8.8.8 # Google DNS
+      - 8.8.4.4 # Google DNS
+    env_file:
+      - .env.development.local
+    depends_on:
+      - monogolocaldb
+
+

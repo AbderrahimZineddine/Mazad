@@ -7,9 +7,9 @@ import {
   NotFoundException,
   ForbiddenException,
 } from "@nestjs/common";
-import { RequestWithUser } from "../types/request-with-user.type";
 import { AuctionsService } from "src/modules/auctions/auction.service";
 import { ProductsService } from "src/modules/products/products.service";
+import { Request } from "express";
 
 @Injectable()
 export class ValidateBidCreationGuard implements CanActivate {
@@ -19,7 +19,8 @@ export class ValidateBidCreationGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<RequestWithUser>();
+    const req = context.switchToHttp().getRequest<Request>();
+    if (!req.body) throw new NotFoundException("Request body is missing");
     const product = await this.productsService.findOne(req.body.product);
 
     if (!product) throw new NotFoundException("Product not found");

@@ -27,6 +27,8 @@ export class ProductsController {
     const data = await this.productsService.create(createProductDto);
 
     return {
+      success: true,
+      statusCode: 201,
       data,
     };
   }
@@ -74,8 +76,8 @@ export class ProductsController {
     @Param("id") id: string,
     @Body() updateProductDto: UpdateProductDto
   ) {
-    const data = await this.productsService.update(id, updateProductDto);
-
+   
+    const data = await this.productsService.update(id , updateProductDto);
     return {
       success: true,
       statusCode: 200,
@@ -86,11 +88,11 @@ export class ProductsController {
   @Delete(":id")
   // @UseGuards(AdminGuard)
   async deleteProduct(@Param("id") id: string) {
-    await this.productsService.remove(id);
+    const message = await this.productsService.remove(id);
     return {
       success: true,
       statusCode: 204,
-      message: "Product deleted successfully",
+      message,
     };
   }
 }

@@ -11,7 +11,7 @@ export class Banner extends Document {
   region: string;
 
   @Prop({ required: true })
-  images: string[];
+  image: string;
 
 }
 
