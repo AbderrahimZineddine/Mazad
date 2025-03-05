@@ -30,9 +30,9 @@ export class HttpAuthGuard implements CanActivate {
     try {
       const payload: JwtPayload = this.jwtService.verify(token)
 
-      if (payload.isVerified !== true && !this.reflector.get<boolean>(CHECK_VERIFIED_KEY, context.getHandler())) {
-        throw new HttpException('User is not verified', 600) // 600 is custom code for unverified user
-      }
+      // if (payload.isVerified !== true && !this.reflector.get<boolean>(CHECK_VERIFIED_KEY, context.getHandler())) {
+      //   throw new HttpException('User is not verified', 600) // 600 is custom code for unverified user
+      // }
 
 
       this.checkRole(context, payload)
