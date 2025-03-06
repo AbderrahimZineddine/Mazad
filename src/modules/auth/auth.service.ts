@@ -13,6 +13,7 @@ import {
 } from "src/models/auth.entity";
 import { v4 } from "uuid";
 import { User } from "../users/schemas/user.schema";
+import { UserRoles } from "src/core/enums/user-roles.enum";
 
 @Injectable()
 export class AuthService {
@@ -47,7 +48,14 @@ export class AuthService {
       ? await CryptHelper.hash(nonHashedPass)
       : undefined;
 
-    const user = await this.userModel.create({ region, phone, password, name });
+    const user = await this.userModel.create({
+      region,
+      phone,
+      password,
+      name,
+      role: UserRoles.ADMIN,
+      isVerified: true,
+    });
 
     await this.generateAccountVerificationOtp(user);
     console.log(process.env.JWT_SECRET);
