@@ -21,7 +21,7 @@ export class BidsService {
     @InjectModel(Auction.name) private auctionModel: Model<Auction>,
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(User.name) private userModel: Model<User>
-  ) { }
+  ) {}
 
   async create(userId: string, productId: string, createBidDto: CreateBidDto) {
     const existingBid = await this.bidModel.findOne({
@@ -33,7 +33,7 @@ export class BidsService {
       throw new ConflictException("You already have a bid for this product");
     }
 
-    //? فكنا من checking 
+    //? فكنا من checking
 
     // const product = await this.productModel.findById(createBidDto.product);
     // if (!product) throw new NotFoundException("Product not found");
@@ -51,7 +51,8 @@ export class BidsService {
     // }
 
     const createdBid = await this.bidModel.create({
-      ...createBidDto, product: productId,
+      ...createBidDto,
+      product: productId,
       user: userId,
     });
 
@@ -142,9 +143,24 @@ export class BidsService {
       .sort(filters.sort);
   }
 
-  async findOne(id: string) {
+  async findMyBids(
+    id: string,
+    filters: {
+      page: number;
+      limit: number;
+    }
+  ) {
+    return this.bidModel
+      .find({ user: id })
+      .populate('product', "-auction")
+      .select('-user')
+      .skip((filters.page - 1) * filters.limit)
+      .limit(filters.limit);
+  }
+
+  async findOne(id: string, userId: string) {
     const bid = await this.bidModel
-      .findOne({ product: id })
+      .findOne({ product: id, user: userId })
       .populate("user", "-password -newPassword -newPasswordExpires")
       .populate("product", "-auction");
 

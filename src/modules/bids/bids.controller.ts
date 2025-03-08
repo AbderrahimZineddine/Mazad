@@ -14,20 +14,24 @@ import {
 import { BidsService } from "./bids.service";
 import { CreateBidDto } from "./dto/create-bid.dto";
 import { UpdateBidDto } from "./dto/update-bid.dto";
-import { ValidateBidUpdateGuard } from "../../guards/validate-bid-update.guard";
-import { ValidateBidDeletionGuard } from "../../guards/validate-bid-deletion.guard";
-import { ValidateBidCreationGuard } from "src/guards/validate-bid-creation.guard";
+// import { ValidateBidUpdateGuard } from "../../guards/validate-bid-update.guard";
+// import { ValidateBidDeletionGuard } from "../../guards/validate-bid-deletion.guard";
+// import { ValidateBidCreationGuard } from "src/guards/validate-bid-creation.guard";
 import { HttpAuthGuard } from "../auth/guards/auth.guard";
 import { Request } from "express";
 
 @Controller("bids")
 @UseGuards(HttpAuthGuard)
 export class BidsController {
-  constructor(private readonly bidsService: BidsService) { }
+  constructor(private readonly bidsService: BidsService) {}
 
   @Post(":productId")
   // @UseGuards(ValidateBidCreationGuard)
-  async create(@Req() req: Request, @Body() createBidDto: CreateBidDto, @Param("productId") productId: string) {
+  async create(
+    @Req() req: Request,
+    @Body() createBidDto: CreateBidDto,
+    @Param("productId") productId: string
+  ) {
     console.log(req.user.id);
     const data = await this.bidsService.create(
       req.user.id.toString(),
@@ -92,9 +96,34 @@ export class BidsController {
     };
   }
 
+  @Get("/me")
+  async findMyBids(
+    @Query("page") page: number = 1,
+    @Query("limit") limit: number = 100,
+    @Req() req: Request
+  ) {
+    const filters = {
+      page,
+      limit,
+    };
+
+    const data = await this.bidsService.findMyBids(
+      req.user.id.toString(),
+      filters
+    );
+
+    return {
+      success: true,
+      statusCode: 200,
+      limit,
+      page,
+      data,
+    };
+  }
+
   @Get(":id")
-  async findOne(@Param("id") id: string) {
-    const data = await this.bidsService.findOne(id);
+  async findOne(@Param("id") id: string, @Req() req: Request) {
+    const data = await this.bidsService.findOne(id, req.user.id.toString());
 
     return {
       success: true,
@@ -116,7 +145,7 @@ export class BidsController {
   }
 
   @Delete(":id")
-  @UseGuards(ValidateBidDeletionGuard)
+  // @UseGuards(ValidateBidDeletionGuard)
   async remove(@Param("id") id: string) {
     const message = await this.bidsService.remove(id);
 

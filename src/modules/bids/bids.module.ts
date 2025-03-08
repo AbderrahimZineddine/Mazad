@@ -8,9 +8,9 @@ import { ProductsModule } from "../products/products.module";
 import { AuctionsModule } from "src/modules/auctions/auction.module";
 import { UsersModule } from "src/modules/users/users.module";
 import { AuthModule } from "src/modules/auth/auth.module";
-import { ValidateBidCreationGuard } from "src/guards/validate-bid-creation.guard";
-import { ValidateBidUpdateGuard } from "src/guards/validate-bid-update.guard";
-import { ValidateBidDeletionGuard } from "src/guards/validate-bid-deletion.guard";
+// import { ValidateBidCreationGuard } from "src/guards/validate-bid-creation.guard";
+// import { ValidateBidUpdateGuard } from "src/guards/validate-bid-update.guard";
+// import {! ValidateBidDeletionGuard } from "src/guards/validate-bid-deletion.guard";
 
 @Module({
   imports: [
@@ -23,9 +23,9 @@ import { ValidateBidDeletionGuard } from "src/guards/validate-bid-deletion.guard
   controllers: [BidsController],
   providers: [
     BidsService,
-    ValidateBidCreationGuard,
-    ValidateBidUpdateGuard,
-    ValidateBidDeletionGuard,
+    // ValidateBidCreationGuard,
+    // ValidateBidUpdateGuard!,
+    // ValidateBidDeletionGuard,
   ],
   exports: [BidsService],
 })
