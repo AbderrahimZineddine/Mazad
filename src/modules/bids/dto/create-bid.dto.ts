@@ -3,8 +3,6 @@
 import { IsMongoId, IsNumber, Min } from 'class-validator';
 
 export class CreateBidDto {
-  @IsMongoId()
-  product: string;
 
   @IsNumber()
   @Min(0)

@@ -21,35 +21,37 @@ export class BidsService {
     @InjectModel(Auction.name) private auctionModel: Model<Auction>,
     @InjectModel(Product.name) private productModel: Model<Product>,
     @InjectModel(User.name) private userModel: Model<User>
-  ) {}
+  ) { }
 
-  async create(userId: string, createBidDto: CreateBidDto) {
+  async create(userId: string, productId: string, createBidDto: CreateBidDto) {
     const existingBid = await this.bidModel.findOne({
       user: userId,
-      product: createBidDto.product,
+      product: productId,
     });
 
     if (existingBid) {
       throw new ConflictException("You already have a bid for this product");
     }
 
-    const product = await this.productModel.findById(createBidDto.product);
-    if (!product) throw new NotFoundException("Product not found");
+    //? فكنا من checking 
 
-    if (createBidDto.amount < product.price) {
-      throw new BadRequestException(
-        `Bid amount must be at least ${product.price}`
-      );
-    }
+    // const product = await this.productModel.findById(createBidDto.product);
+    // if (!product) throw new NotFoundException("Product not found");
 
-    if (createBidDto.quantity > product.stock) {
-      throw new BadRequestException(
-        `Requested quantity exceeds available stock (${product.stock})`
-      );
-    }
+    // if (createBidDto.amount < product.price) {
+    //   throw new BadRequestException(
+    //     `Bid amount must be at least ${product.price}`
+    //   );
+    // }
+
+    // if (createBidDto.quantity > product.stock) {
+    //   throw new BadRequestException(
+    //     `Requested quantity exceeds available stock (${product.stock})`
+    //   );
+    // }
 
     const createdBid = await this.bidModel.create({
-      ...createBidDto,
+      ...createBidDto, product: productId,
       user: userId,
     });
 
@@ -142,7 +144,7 @@ export class BidsService {
 
   async findOne(id: string) {
     const bid = await this.bidModel
-      .findById(id)
+      .findOne({ product: id })
       .populate("user", "-password -newPassword -newPasswordExpires")
       .populate("product", "-auction");
 

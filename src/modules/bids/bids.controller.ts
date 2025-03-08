@@ -23,14 +23,15 @@ import { Request } from "express";
 @Controller("bids")
 @UseGuards(HttpAuthGuard)
 export class BidsController {
-  constructor(private readonly bidsService: BidsService) {}
+  constructor(private readonly bidsService: BidsService) { }
 
-  @Post()
-  @UseGuards(ValidateBidCreationGuard)
-  async create(@Req() req: Request, @Body() createBidDto: CreateBidDto) {
+  @Post(":productId")
+  // @UseGuards(ValidateBidCreationGuard)
+  async create(@Req() req: Request, @Body() createBidDto: CreateBidDto, @Param("productId") productId: string) {
     console.log(req.user.id);
     const data = await this.bidsService.create(
       req.user.id.toString(),
+      productId,
       createBidDto
     );
 
@@ -103,7 +104,7 @@ export class BidsController {
   }
 
   @Patch(":id")
-  @UseGuards(ValidateBidUpdateGuard)
+  // @UseGuards(ValidateBidUpdateGuard)
   async update(@Param("id") id: string, @Body() updateBidDto: UpdateBidDto) {
     const data = await this.bidsService.update(id, updateBidDto);
 

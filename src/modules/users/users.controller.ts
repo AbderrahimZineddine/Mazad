@@ -31,11 +31,17 @@ import { HttpAuthGuard } from "../auth/guards/auth.guard";
 @Controller("users")
 @UseGuards(HttpAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get("me")
-  getCurrentUser(@Req() req: Request) {
-    return this.usersService.getCurrentUser(req.user.id.toString());
+  async getCurrentUser(@Req() req: Request) {
+
+    const data = await this.usersService.getCurrentUser(req.user.id.toString());
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
   }
 
   @Get(":userId")
@@ -76,6 +82,25 @@ export class UsersController {
     };
   }
 
+  @Patch("/me")
+  async updateCurrentUser(
+    @Req() req: Request,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
+
+
+    const data = await this.usersService.updateUser(
+      req.user.id.toString(),
+      updateUserDto
+    );
+
+    return {
+      success: true,
+      statusCode: 200,
+      data,
+    };
+  }
+
   @Patch(":userId")
   // @UseGuards(OwnerOrAdminGuard)
   async updateUser(
@@ -90,6 +115,8 @@ export class UsersController {
       data,
     };
   }
+
+
 
   @Delete(":userId")
   // @UseGuards(OwnerOrAdminGuard)
